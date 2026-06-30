@@ -1,0 +1,2 @@
+# goldnpayweb
+Website of goldnpay
