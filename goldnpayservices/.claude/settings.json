@@ -24,6 +24,8 @@
       "Bash(tail:*)",
       "Bash(head:*)",
       "Bash(grep:*)",
+      "Bash(npm install:*)",
+      "Bash(npm audit:*)",
       "Edit(/.claude-workspace/**)",
       "Write(/.claude-workspace/**)",
       "Edit(/ai-reports/**)",
@@ -52,8 +54,8 @@
       "Bash(git stash drop:*)",
       "Bash(git stash clear)",
       "Bash(git commit --amend:*)",
-      "Bash(npm audit fix:*)",
-      "Bash(npm install:*)"
+      "Bash(npm audit fix:*)"
+
     ]
   }
 }
