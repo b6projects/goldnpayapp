@@ -31,6 +31,7 @@ describe('owner inputs (AC3)', () => {
       [
         'src/config/site.ts',
         'src/data/faqs.ts',
+        'src/data/home.ts',
         'src/data/partners.ts',
         'src/data/stats.ts',
         'src/data/testimonials.ts',
