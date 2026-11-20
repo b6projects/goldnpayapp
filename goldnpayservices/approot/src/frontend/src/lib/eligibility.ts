@@ -38,3 +38,10 @@ export function maxEligibleLoan(input: EligibilityInput): EligibilityResult {
   const growth = Math.pow(1 + r, months);
   return { maxEmi, maxLoan: (maxEmi * (growth - 1)) / (r * growth) };
 }
+
+/** Rounds an eligible loan amount down to the nearest step (default 10,000 INR). */
+export function roundDownEligible(maxLoan: number, step = 10_000): number {
+  if (!Number.isFinite(step) || step <= 0) throw new RangeError('step must be a positive number');
+  if (!Number.isFinite(maxLoan) || maxLoan <= 0) return 0;
+  return Math.floor(maxLoan / step) * step;
+}

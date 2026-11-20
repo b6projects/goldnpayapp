@@ -1,5 +1,28 @@
 import { describe, expect, it } from 'vitest';
-import { buildSchedule, calculateEmi, summarize } from './emi';
+import { buildSchedule, calculateEmi, summarize, summarizeByYear } from './emi';
+
+describe('summarizeByYear', () => {
+  it('groups a 30 month schedule into 3 years with a partial last year', () => {
+    const years = summarizeByYear(buildSchedule(500_000, 12, 30));
+    expect(years.map((y) => y.year)).toEqual([1, 2, 3]);
+    expect(years.map((y) => y.rows.length)).toEqual([12, 12, 6]);
+    expect(years[2].balance).toBe(0);
+  });
+
+  it('year totals add up to the whole schedule', () => {
+    const rows = buildSchedule(1_000_000, 10, 24);
+    const years = summarizeByYear(rows);
+    const principal = years.reduce((a, y) => a + y.principal, 0);
+    const interest = years.reduce((a, y) => a + y.interest, 0);
+    expect(principal).toBeCloseTo(1_000_000, 4);
+    expect(interest).toBeCloseTo(summarize(1_000_000, 10, 24).totalInterest, 4);
+    expect(years[0].balance).toBe(rows[11].balance);
+  });
+
+  it('returns an empty list for an empty schedule', () => {
+    expect(summarizeByYear([])).toEqual([]);
+  });
+});
 
 const cases = [
   { p: 1_000_000, r: 10, n: 12, emi: 87915.89, interest: 54990.65 },

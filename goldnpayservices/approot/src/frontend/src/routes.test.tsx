@@ -1,8 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { routes } from './routes';
 import { site } from './config/site';
+
+vi.mock('./components/tools/EmiChart', () => ({ default: () => null }));
 
 function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] });

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import LoanDetail from './LoanDetail';
@@ -6,6 +6,8 @@ import NotFound from './NotFound';
 import { loans } from '../data/loans';
 import { formatINRCompact, formatTenure } from '../lib/format';
 import { getRelatedLoans } from '../components/loans/getRelatedLoans';
+
+vi.mock('../components/tools/EmiChart', () => ({ default: () => null }));
 
 afterEach(cleanup);
 
