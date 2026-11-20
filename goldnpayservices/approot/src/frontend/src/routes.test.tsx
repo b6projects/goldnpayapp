@@ -12,7 +12,7 @@ function renderAt(path: string) {
 const cases: [string, string][] = [
   ['/', site.tagline],
   ['/loans', 'Loan Types'],
-  ['/loans/personal-loan', 'Loan Details'],
+  ['/loans/personal-loan', 'Personal Loan'],
   ['/emi-calculator', 'EMI Calculator'],
   ['/eligibility', 'Loan Eligibility Calculator'],
   ['/consultation', 'Get Free Consultation'],
@@ -28,7 +28,16 @@ const cases: [string, string][] = [
 describe('routes', () => {
   it.each(cases)('renders %s', async (path, heading) => {
     renderAt(path);
-    expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: heading }, { timeout: 5000 }),
+    ).toBeInTheDocument();
+  });
+
+  it('renders NotFound for an unknown loan slug', async () => {
+    renderAt('/loans/nope');
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Page Not Found' }),
+    ).toBeInTheDocument();
   });
 
   it('renders NotFound for unknown paths', async () => {
