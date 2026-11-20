@@ -61,3 +61,31 @@ export function summarize(principal: number, annualRatePct: number, months: numb
   const totalPayment = emi * months;
   return { emi, totalPayment, totalInterest: totalPayment - principal };
 }
+
+export interface YearSummary {
+  year: number;
+  principal: number;
+  interest: number;
+  /** Balance after the last month of the year. */
+  balance: number;
+  /** The schedule rows that fall in this year. */
+  rows: ScheduleRow[];
+}
+
+/** Groups a schedule into repayment years; the last year may be partial. */
+export function summarizeByYear(rows: ScheduleRow[]): YearSummary[] {
+  const years: YearSummary[] = [];
+  for (const row of rows) {
+    const year = Math.ceil(row.month / 12);
+    let entry = years[year - 1];
+    if (!entry) {
+      entry = { year, principal: 0, interest: 0, balance: row.balance, rows: [] };
+      years[year - 1] = entry;
+    }
+    entry.principal += row.principal;
+    entry.interest += row.interest;
+    entry.balance = row.balance;
+    entry.rows.push(row);
+  }
+  return years;
+}

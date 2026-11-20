@@ -1,5 +1,32 @@
 import { describe, expect, it } from 'vitest';
-import { maxEligibleLoan } from './eligibility';
+import { maxEligibleLoan, roundDownEligible } from './eligibility';
+
+describe('roundDownEligible', () => {
+  it('rounds down to the nearest 10,000', () => {
+    expect(roundDownEligible(1_860_993.09)).toBe(1_860_000);
+    expect(roundDownEligible(1_860_000)).toBe(1_860_000);
+    expect(roundDownEligible(9_999.99)).toBe(0);
+  });
+  it('returns 0 for zero, negative or non-finite input', () => {
+    expect(roundDownEligible(0)).toBe(0);
+    expect(roundDownEligible(-5)).toBe(0);
+    expect(roundDownEligible(Number.NaN)).toBe(0);
+  });
+  it('supports a custom step and rejects an invalid one', () => {
+    expect(roundDownEligible(123_456, 1000)).toBe(123_000);
+    expect(() => roundDownEligible(100, 0)).toThrow(RangeError);
+  });
+  it('matches the spec vector', () => {
+    const { maxEmi, maxLoan } = maxEligibleLoan({
+      monthlyIncome: 100_000,
+      existingEmis: 10_000,
+      annualRatePct: 10.5,
+      months: 60,
+    });
+    expect(maxEmi).toBe(40_000);
+    expect(roundDownEligible(maxLoan)).toBe(1_860_000);
+  });
+});
 
 describe('maxEligibleLoan', () => {
   it('computes reference case 1', () => {
