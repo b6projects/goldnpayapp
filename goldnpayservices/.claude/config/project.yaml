@@ -38,7 +38,8 @@ docs:
 # JIRA
 # ---------------------------------------------------------------------
 jira:
-  project_key: GPS                     
+  cloud_id: 1c438311-d619-4b94-88e4-08ce3b1c9ad6   # site: balamohan-krishnan-goldbucksapp.atlassian.net
+  project_key: GPS
   # Sprint display names look like "<sprint_name_prefix> <n>", e.g. "GNPSprint 1".
   # Folder/branch ids replace spaces and special characters with "_" -> GNPSprint_1
   sprint_name_prefix: GPSSprint        
