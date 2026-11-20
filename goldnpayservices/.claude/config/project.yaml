@@ -1,0 +1,230 @@
+# =====================================================================
+# Project configuration for the Claude SDLC agents
+# ---------------------------------------------------------------------
+# Every agent in .claude/agents/ reads this file at the start of a run.
+# It is the ONLY place project-specific values live. The agents
+# themselves are generic: to reuse them in another repository, copy the
+# whole .claude/ folder and edit this file.
+#
+# Agents refer to values here as `config.<section>.<key>`, e.g.
+# `config.git.source_branch`.
+#
+# Anything marked  # TODO  must be filled in before the agent that uses
+# it will run. Agents stop and report a missing value; they never guess.
+# =====================================================================
+
+project:
+  name: GoldNPay Services              # human-readable project name
+  code: GNP                            # short code used in examples/log lines
+  root: approot/src                    # repo-relative root that holds the modules
+
+# ---------------------------------------------------------------------
+# Paths (repo-relative)
+# ---------------------------------------------------------------------
+paths:
+  workspace: .claude-workspace         # agents' working area (keep it gitignored)
+  reports: ai-reports                  # audit/report output (JiraUpdate/, db/)
+  skills_dir: .claude/skills           # where SKILL.md folders live (see README)
+  templates_dir: .claude/templates
+  resources_dir: .claude/resources
+
+# Project documentation the agents use as grounding.
+docs:
+  functional: goldnpayservices\projectdoc\FunctionalDetails.md   # TODO create
+  technical: goldnpayservices\projectdoc\TechnicalDetails.md     # TODO create
+  db_schema: not required for now         # TODO create (db-health-check)
+
+# ---------------------------------------------------------------------
+# JIRA
+# ---------------------------------------------------------------------
+jira:
+  project_key: GPS                     
+  # Sprint display names look like "<sprint_name_prefix> <n>", e.g. "GNPSprint 1".
+  # Folder/branch ids replace spaces and special characters with "_" -> GNPSprint_1
+  sprint_name_prefix: GPSSprint        
+  fields:
+    required:
+      - Summary
+      - Description
+      - Acceptance Criteria
+      - Priority
+      - Business Requirement
+    optional:
+      - Dependencies
+      - Linked Issues
+      - Technical Requirement
+  # Logical workflow status -> the exact status name in this JIRA project.
+  # Agents always pick a transition by its TARGET status name (to.name),
+  # never by the transition's own name.
+  statuses:
+    todo: To Do
+    analysed: Analysed
+    developed: Developed
+    testing: Testing
+    done: Done
+    bug_fix: Bug Fix
+    packaged: Packaged
+    released: Released
+    hold: Hold
+  # Free-text warnings about this project's workflow that agents must respect.
+  workflow_notes:
+    - "A transition *named* 'Done' or 'Deploy' may lead to the Released status. Always match on to.name."
+  # Max failed test -> bug-fix cycles before sprint-processor asks the human.
+  bug_fix_cycle_limit: 2
+
+# ---------------------------------------------------------------------
+# Git
+# ---------------------------------------------------------------------
+git:
+  source_branch: main                  # TODO version/release branch features come from
+  sprint_branch:
+    pattern: "sprint/{sprint_id}"
+  feature_branch:
+    pattern: "feature/{key}-{slug}"
+    slug:
+      max_words: 5
+      max_chars: 40
+  rules:
+    require_clean_worktree: true
+    prevent_source_direct_commit: true
+    remote_operations: false           # agents never fetch/pull/push (standalone closure may pull --ff-only)
+  commit:
+    message_pattern: "{type}({key}): {summary}"
+    types: [feat, fix, refactor, chore, docs, test, perf]
+
+# ---------------------------------------------------------------------
+# Modules, build and test
+# ---------------------------------------------------------------------
+# One entry per deployable module. Agents build/test/package ONLY with the
+# commands configured here. A missing command is reported as
+# "NOT RUN — no command configured"; agents never invent one.
+#
+# stack:        key into `stacks` below (selects review checklists + skills)
+# path:         repo-relative module directory (commands run from here)
+# install:      dependency install (asked for approval before running)
+# build:        compile/build command used by jira-item-developer
+# unit_test:    unit test command used by jira-item-tester
+# test_parser:  how to read counts from the test log: maven | jest | vitest | pytest | generic
+# package:      command that produces the shippable artifact
+# artifacts:    files that must exist (and be fresh) after `package`
+# lint:         read-only lint command on changed files ({files} placeholder); never --fix
+# audit:        read-only dependency audit
+# log_filter:   grep -v pattern for known-benign noise when reading logs
+# dockerfile:   used for the runtime-fit check (JDK/Node version vs. build)
+testing:
+  modules:
+    backend:
+      stack: TODO                      # e.g. spring-boot | node-express | python-fastapi
+      path: approot/src/backend
+      install: null
+      build: null                      # TODO e.g. "./mvnw -q compile"
+      unit_test: null                  # TODO e.g. "./mvnw test"
+      test_parser: generic
+      package: null                    # TODO e.g. "./mvnw -q package -DskipTests"
+      artifacts: []                    # TODO e.g. ["target/app.jar"]
+      lint: null
+      audit: null
+      log_filter: null
+      dockerfile: approot/src/docker/backend.Dockerfile   # TODO confirm
+    frontend:
+      stack: TODO                      # e.g. react
+      path: approot/src/frontend
+      install: null                    # TODO e.g. "npm ci"
+      build: null                      # TODO e.g. "npm run build"
+      unit_test: null                  # TODO e.g. "npm test -- --run"
+      test_parser: generic
+      package: null                    # TODO usually same as build, e.g. "npm run build"
+      artifacts: []                    # TODO e.g. ["dist/index.html", "dist/assets/*.js"]
+      lint: null                       # TODO e.g. "npx eslint {files}"
+      audit: null                      # TODO e.g. "npm audit --omit=dev"
+      log_filter: null                 # e.g. "Module level directives"
+      dockerfile: approot/src/docker/frontend.Dockerfile  # TODO confirm
+  # Folders that hold code but have no configured tooling. Listed as NOT COVERED
+  # in test reports and flagged if they contain changed files.
+  not_covered: [approot/src/database, approot/src/scripts]
+  e2e:
+    spec_glob: null                    # e.g. "approot/src/frontend/e2e/**/*.spec.ts" (counted, never run)
+  coverage:
+    enabled: false
+  timeout_ms: 600000                   # Bash timeout for every build/test/package run
+
+# ---------------------------------------------------------------------
+# Stack profiles — conventions, skills and review checklists per stack.
+# Add a profile for any new stack a module uses.
+# ---------------------------------------------------------------------
+stacks:
+  spring-boot:
+    layering: "Controller -> DTO -> Service -> Repository -> Entity"
+    skills: [spring-boot, junit, api-standards, application-architecture]
+    standards_checks:
+      - "Thin controller; business logic in the service; data-only repository"
+      - "DTOs (not entities) as request/response bodies"
+      - "Validation annotations (@Valid etc.) on new request DTOs"
+      - "@Transactional on multi-step writes"
+      - "No System.out.println / printStackTrace"
+    security_checks:
+      - "SQL built by concatenation (createNativeQuery, @Query with +)"
+      - "Request bodies without @Valid / validation annotations"
+      - "Removed or weakened authorization (@PreAuthorize, authorizeHttpRequests, permitAll, csrf().disable(), open CORS)"
+      - "Weak crypto (MD5, SHA-1, DES, java.util.Random for tokens)"
+      - "Unsafe deserialization or Runtime.exec"
+      - "Financial writes without a transaction or server-side re-validation"
+    artifact_checks:
+      - "Jar is an executable Spring Boot jar (contains BOOT-INF/)"
+    runtime_fit: "pom java.version must not exceed the JDK of the Dockerfile base image"
+  react:
+    layering: "Component -> State -> API Service -> Backend API"
+    skills: [react-development, api-standards, application-architecture]
+    standards_checks:
+      - "No console.log left in changed code"
+      - "Run the configured lint on changed files only"
+    security_checks:
+      - "dangerouslySetInnerHTML, innerHTML, eval, new Function"
+      - "Tokens or secrets in localStorage, source or env-config files"
+      - "Hard-coded backend URLs or keys"
+      - "target=\"_blank\" without rel=\"noopener noreferrer\""
+      - "Sensitive data in console.*"
+      - "Removed route/role guards"
+    artifact_checks:
+      - "dist/index.html newer than the build marker and at least one .js in dist/assets/"
+    runtime_fit: "Dockerfile Node version should match the Node that built the bundle"
+
+# Skills every agent may use regardless of stack (looked up in paths.skills_dir).
+skills:
+  common:
+    analysis: [requirement-analysis, codebase-analysis, impact-analysis, implementation-planning, acceptance-criteria, jira-validation]
+    jira: [jira-update, jira-validation]
+    development: [branching, commit, coding-standards, application-architecture, api-standards, database-change, security]
+    testing: [testing-strategy, test-coverage, regression-testing, coding-standards, security]
+    closure: [commit, merge, branching]
+    database: [database-connectivity]
+
+# ---------------------------------------------------------------------
+# Review policy (jira-item-tester)
+# ---------------------------------------------------------------------
+review:
+  # Changes touching these areas are always listed as security-relevant.
+  security_sensitive_areas: [authentication, authorization, payments, wallets, gold valuation, KYC, customer PII]  # TODO adjust
+  forbidden_in_changeset: [".env", "*.pem", "*.jks", "*.key", "env-config.js"]
+  generated_output: ["target/", "dist/", "node_modules/", "build/", "playwright-report/", "test-results/"]
+
+# ---------------------------------------------------------------------
+# Database (db-health-check)
+# ---------------------------------------------------------------------
+database:
+  engine: TODO                         # e.g. mysql | postgresql
+  client_command: null                 # TODO e.g. "mysql" — must be on PATH
+  environments:
+    DEV:
+      url: TODO                        # e.g. jdbc:mysql://host:3306/goldnpay
+      username: TODO
+      password_env_var: GNP_DB_DEV_PASSWORD
+    UAT:
+      url: TODO
+      username: TODO
+      password_env_var: GNP_DB_UAT_PASSWORD
+    PRD:
+      url: TODO
+      username: TODO
+      password_env_var: GNP_DB_PRD_PASSWORD
+  health_check_queries: .claude/resources/dbhealthchecksql.md
