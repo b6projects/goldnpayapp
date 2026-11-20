@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { routes } from './routes';
+import { site } from './config/site';
 
 function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
@@ -9,7 +10,7 @@ function renderAt(path: string) {
 }
 
 const cases: [string, string][] = [
-  ['/', 'Loan Consultation Services'],
+  ['/', site.tagline],
   ['/loans', 'Loan Types'],
   ['/loans/personal-loan', 'Loan Details'],
   ['/emi-calculator', 'EMI Calculator'],

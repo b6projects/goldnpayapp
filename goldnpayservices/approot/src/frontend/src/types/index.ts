@@ -54,3 +54,13 @@ export interface Stat {
   label: string;
   value: string;
 }
+
+export interface HomeStep {
+  title: string;
+  description: string;
+}
+
+export interface WhyUsPoint {
+  title: string;
+  description: string;
+}

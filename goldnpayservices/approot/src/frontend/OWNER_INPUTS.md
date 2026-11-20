@@ -19,6 +19,7 @@ Find them all with: `grep -rn "TODO(owner)" src`. The M10 README folds this list
 
 ## src/data
 - `faqs.ts`: fee policy answer to "Do you charge customers a fee?" and how the business is paid
+- `home.ts`: confirm the fee policy before keeping the "No-cost consultation" claim on the home page
 - `partners.ts`: real partner list and permission to show names and logos (also replace the SVGs in public/images/partners)
 - `stats.ts`: four real, verifiable figures
 - `testimonials.ts`: real, consented testimonials
