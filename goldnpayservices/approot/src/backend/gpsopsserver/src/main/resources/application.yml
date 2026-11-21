@@ -1,0 +1,122 @@
+# No secrets here, not even defaults: every secret is ${ENV_VAR} so the server
+# fails to start when one is missing. The active profile (dev/uat/prd) is set
+# from ENV by the Docker entrypoint (-Dspring.profiles.active=<env lower-case>).
+spring:
+  application:
+    name: gps-ops-server
+  profiles:
+    default: dev
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_SCHEMA}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&connectionTimeZone=UTC
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      # Core owns the schema through Flyway. Ops only validates it and never alters tables.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: false
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
+  thymeleaf:
+    check-template-location: false
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-stacktrace: never
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    mail:
+      enabled: false   # an SMTP outage must not mark Ops as down; email retries cover it
+
+springdoc:
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+
+app:
+  env: ${ENV}
+  jwt:
+    secret: ${JWT_SECRET_KEY}
+  security:
+    core-to-ops-api-key: ${CORE_TO_OPS_API_KEY}   # incoming: Core calls Ops with this
+    ops-to-core-api-key: ${OPS_TO_CORE_API_KEY}   # outgoing: Ops calls Core with this
+  core:
+    base-url: ${CORE_BASE_URL}
+    connect-timeout-ms: 3000
+    read-timeout-ms: 10000
+  mail:
+    from: ${MAIL_FROM}
+    reply-to: ${MAIL_REPLY_TO}
+    max-recipients: 50
+    max-attachment-bytes: 10485760
+    max-subject-length: 200
+    retries: 3
+    backoff-ms: 1000
+    brand:
+      name: GoldNPay
+      site-url: https://goldnpay.in
+      logo-url: https://goldnpay.in/images/logo.png
+      address: GoldNPay, India
+      contact: support@goldnpay.in
+      unsubscribe-url: https://goldnpay.in/unsubscribe
+  telegram:
+    support-bot-username: ${TGM_SUPPORT_BOT_USERNAME}
+    support-bot-token: ${TGM_SUPPORT_BOT_TOKEN}
+    pr-bot-username: ${TGM_PR_BOT_USERNAME}
+    pr-bot-token: ${TGM_PR_BOT_TOKEN}
+    pr-channel-id: ${TGM_PR_CHANNEL_ID}
+    api-base: https://api.telegram.org
+    polling-enabled: true
+    global-per-second: 30
+    per-chat-interval-ms: 1000
+    max-pending: 10000
+  discord:
+    webhook-url: ${DISCORD_WEBHOOK_URL}
+  twitter:
+    api-key: ${TWITTER_API_KEY}
+    api-secret: ${TWITTER_API_SECRET}
+    access-token: ${TWITTER_ACCESS_TOKEN}
+    access-secret: ${TWITTER_ACCESS_SECRET}
+  schedule:
+    enabled: true
+    zone: Asia/Kolkata
+    goldrate-cron: ${SCHEDULE_GOLDRATE_CRON:0 30 9,15 * * *}
+    inactive-cron: ${SCHEDULE_INACTIVE_CRON:0 0 10 * * *}
+    cache-cron: ${SCHEDULE_CACHE_CRON:0 0/15 * * * *}
+  reminders:
+    after-days: 2
+    max-per-user: 3
+    min-gap-days: 2
+    batch-size: 200

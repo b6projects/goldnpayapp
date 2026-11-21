@@ -1,0 +1,2 @@
+org.springframework.boot.env.EnvironmentPostProcessor=com.gps.os.config.RequiredConfigCheck
+org.springframework.boot.diagnostics.FailureAnalyzer=com.gps.os.config.MissingConfigFailureAnalyzer

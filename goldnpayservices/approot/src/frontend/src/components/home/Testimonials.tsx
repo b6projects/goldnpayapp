@@ -1,5 +1,6 @@
 import Section from '../ui/Section';
 import Card from '../ui/Card';
+import Reveal from '../ui/Reveal';
 import Badge from '../ui/Badge';
 import { site } from '../../config/site';
 import { testimonials } from '../../data/testimonials';
@@ -18,14 +19,17 @@ export default function Testimonials({
   return (
     <Section className="bg-surface" aria-labelledby="testimonials-heading">
       <div className="mb-8 flex flex-wrap items-center gap-3">
-        <h2 id="testimonials-heading" className="text-2xl font-bold text-text md:text-3xl">
+        <h2
+          id="testimonials-heading"
+          className="heading-accent text-2xl font-bold text-text md:text-3xl"
+        >
           What customers say
         </h2>
         {showSample && <Badge>Sample</Badge>}
       </div>
       <ul className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {items.map((t) => (
-          <li key={t.name}>
+        {items.map((t, i) => (
+          <Reveal as="li" key={t.name} delay={i * 120}>
             <Card className="h-full">
               <p className="text-base text-text">&ldquo;{t.quote}&rdquo;</p>
               <p className="mt-4 text-sm font-semibold text-text">{t.name}</p>
@@ -34,7 +38,7 @@ export default function Testimonials({
               </p>
               <p className="mt-1 text-sm text-muted">Rating: {t.rating} out of 5</p>
             </Card>
-          </li>
+          </Reveal>
         ))}
       </ul>
     </Section>

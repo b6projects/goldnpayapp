@@ -72,7 +72,7 @@ describe('Home', () => {
   it('links the partners caption to /partners', () => {
     r();
     const sec = region('Our lending partners');
-    expect(sec).toHaveTextContent('Indicative list. See all partners');
+    expect(sec).toHaveTextContent('See all partners');
     expect(within(sec).getByRole('link', { name: 'See all partners' })).toHaveAttribute('href', '/partners');
   });
 

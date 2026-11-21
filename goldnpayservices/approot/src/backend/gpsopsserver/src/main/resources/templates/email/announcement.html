@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${subject}">GoldNPay</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f1ea;font-family:'Segoe UI',Arial,sans-serif;color:#2b2b2b;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ea;">
+    <tr>
+        <td align="center" style="padding:24px 12px;">
+            <table role="presentation" width="640" cellpadding="0" cellspacing="0"
+                   style="width:100%;max-width:640px;background:#ffffff;border-radius:8px;overflow:hidden;">
+                <!-- banner header for announcements -->
+                <tr>
+                    <td align="center" style="background:#7a5c00;padding:28px;">
+                        <img th:src="${brand.logoUrl}" th:alt="${brand.name}" height="44" style="border:0;"/>
+                        <div th:text="${subject}"
+                             style="color:#ffe9a8;font-size:22px;font-weight:600;margin-top:12px;">Announcement</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:28px;font-size:16px;line-height:1.6;">
+                        <div th:utext="${content}"></div>
+                    </td>
+                </tr>
+                <!-- footer with unsubscribe: announcements only -->
+                <tr>
+                    <td align="center" style="background:#faf7ef;padding:18px 28px;font-size:12px;color:#6b6b6b;line-height:1.6;">
+                        <div th:text="${brand.address}">GoldNPay</div>
+                        <div><span th:text="${brand.contact}">support</span></div>
+                        <div style="margin-top:8px;">
+                            You receive this because you have a <span th:text="${brand.name}">GoldNPay</span> account.
+                            <a th:href="${brand.unsubscribeUrl}" style="color:#7a5c00;">Unsubscribe</a>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

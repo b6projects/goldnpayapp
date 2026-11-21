@@ -7,7 +7,7 @@ import LinkButton from '../ui/LinkButton';
 import MobileNav from './MobileNav';
 
 const navClass =
-  'rounded-xl px-3 py-2 text-base font-medium text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary aria-[current=page]:text-sand';
+  'rounded-xl px-3 py-2 text-base font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary aria-[current=page]:text-sand';
 
 const links: Array<[string, string]> = [
   ['/emi-calculator', 'EMI Calculator'],
@@ -64,7 +64,7 @@ function LoansMenu() {
       {open && (
         <ul
           id="loans-menu"
-          className="absolute left-0 top-full z-50 mt-1 w-64 rounded-xl border border-white/10 bg-primary p-2 shadow-lg"
+          className="absolute left-0 top-full z-50 mt-1 w-64 animate-slide-down rounded-xl border border-white/10 bg-primary p-2 shadow-lg"
         >
           {loans.map((loan) => (
             <li key={loan.slug}>
@@ -85,15 +85,32 @@ function LoansMenu() {
 }
 
 export default function Header() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   const [mobileOpen, setMobileOpen] = useState(false);
   return (
-    <header className="sticky top-0 z-40 border-b border-accent/40 bg-primary">
+    <header
+      className={`sticky top-0 z-40 border-b border-accent/40 bg-primary transition-all duration-300 ${
+        scrolled ? 'bg-primary/95 shadow-lg backdrop-blur' : ''
+      }`}
+    >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
         <Link
           to="/"
           className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          <img src="/images/logo-horizontal.svg" alt={site.name} width={212} height={48} className="h-12 w-auto" />
+          <img
+            src="/images/logo-horizontal.svg"
+            alt={site.name}
+            width={212}
+            height={48}
+            className="h-12 w-auto"
+          />
         </Link>
         <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
           <LoansMenu />

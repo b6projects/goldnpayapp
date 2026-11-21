@@ -1,0 +1,13 @@
+# Keep the build context small and the image reproducible.
+target/
+**/target/
+.idea/
+*.iml
+.vscode/
+.git
+.gitignore
+.env
+.env.*
+*.log
+Dockerfile
+.dockerignore

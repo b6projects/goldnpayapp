@@ -1,0 +1,8 @@
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+server:
+  error:
+    include-stacktrace: never

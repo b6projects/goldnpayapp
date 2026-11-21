@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════
-#  GoldNPay application stack (frontend now, backend later)
+#  GoldNPay application stack: frontend, Core server, Ops server
 #
 #  Values come from .env.<env> in this folder. Run through the
 #  startup scripts, e.g.  scripts/lstartupscripts/prd-app-up.sh
@@ -8,6 +8,11 @@
 #
 #  The network is created by the startup scripts (external here)
 #  so the app and database stacks can be started separately.
+#
+#  Secrets are NOT in git. Both servers read the two files named in
+#  the env file (kept on the host, chmod 600):
+#    DB_SECRETS_PATH   MYSQL_USER, MYSQL_PASSWORD
+#    APP_SECRETS_PATH  see docker/README.md ("Secrets file")
 # ═══════════════════════════════════════════════════════
 
 services:
@@ -27,6 +32,9 @@ services:
     ports:
       - "${CLIENT_BIND_ADDRESS:-0.0.0.0}:${CLIENT_PORT_EXTERNAL}:${CLIENT_PORT_INTERNAL}"
 
+    depends_on:
+      - gnpcoreserver
+
     networks:
       - goldnpay_net
 
@@ -45,48 +53,105 @@ services:
 
     restart: unless-stopped
 
-  # ---------- Backend (enable once approot/src/backend exists) ----------
-  # Mirrors the GoldBucks coreserver service. Uncomment, add the
-  # SERVER_* / MYSQL_* values to each .env file, and add
-  # "depends_on: [gnpserver]" to gnpclient.
-  #
-  # gnpserver:
-  #   container_name: ${SERVER_CONTAINER_NAME}
-  #   image: ${SERVER_IMAGE_REPO:-goldnpay-backend}:${SERVER_IMAGE_TAG}
-  #
-  #   env_file:
-  #     - ${DB_SECRETS_PATH}     # MYSQL_USER, MYSQL_PASSWORD (kept outside the repo)
-  #     - ${APP_SECRETS_PATH}    # JWT secret, SMTP, provider API keys (kept outside the repo)
-  #
-  #   environment:
-  #     ENV: ${ENV}
-  #     MYSQL_HOST: ${MYSQL_HOST}
-  #     MYSQL_PORT: ${MYSQL_PORT_INTERNAL}
-  #     MYSQL_SCHEMA: ${MYSQL_SCHEMA}
-  #     SERVER_PORT: ${SERVER_PORT_INTERNAL}
-  #     LOG_LEVEL: ${SERVER_LOG_LEVEL:-INFO}
-  #     VOLUME_HOME: /app/server
-  #     SUPPORT_VOLUME: /app/server/serverlogs
-  #
-  #   volumes:
-  #     - ${PROJECT_VOLUME}/${SERVER_VOLUME}:/app/server
-  #
-  #   ports:
-  #     - "${SERVER_BIND_ADDRESS:-127.0.0.1}:${SERVER_PORT_EXTERNAL}:${SERVER_PORT_INTERNAL}"
-  #
-  #   networks:
-  #     - goldnpay_net
-  #
-  #   security_opt:
-  #     - no-new-privileges:true
-  #
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       max-size: "10m"
-  #       max-file: "5"
-  #
-  #   restart: unless-stopped
+  # ---------- Core server (GPSCoreServer, com.gps.cs) ----------
+  # Owns the database schema (Flyway). Public routes only are exposed by the reverse proxy.
+  gnpcoreserver:
+    container_name: ${CORE_CONTAINER_NAME}
+    image: ${CORE_IMAGE_REPO:-goldnpay-core-server}:${CORE_IMAGE_TAG:?set CORE_IMAGE_TAG in the env file or pass a version to the startup script}
+
+    env_file:
+      - ${DB_SECRETS_PATH}     # MYSQL_USER, MYSQL_PASSWORD (kept outside the repo)
+      - ${APP_SECRETS_PATH}    # JWT, API keys, field-encryption key (kept outside the repo)
+
+    environment:
+      ENV: ${ENV}
+      SERVER_PORT: ${CORE_PORT_INTERNAL}
+      LOG_LEVEL: ${CORE_LOG_LEVEL:-INFO}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT_INTERNAL}
+      MYSQL_SCHEMA: ${MYSQL_SCHEMA}
+      # Core -> Ops stays on the Docker network.
+      OPS_BASE_URL: http://${OPS_CONTAINER_NAME}:${OPS_PORT_INTERNAL}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      VOLUME_HOME: /app/server
+      KYC_FOLDER: ${KYC_FOLDER:-kyc/}
+      IMAGES_VOLUME: ${IMAGES_VOLUME:-images/}
+      HM_IMAGES_VOLUME: ${HM_IMAGES_VOLUME:-homeimages/}
+      SUPPORT_VOLUME: /app/server/serverlogs
+
+    volumes:
+      # The folder must be writable by uid 10001 (the image's non-root user).
+      - ${PROJECT_VOLUME}/${CORE_VOLUME}:/app/server
+
+    ports:
+      - "${CORE_BIND_ADDRESS:-127.0.0.1}:${CORE_PORT_EXTERNAL}:${CORE_PORT_INTERNAL}"
+
+    networks:
+      - goldnpay_net
+
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    restart: unless-stopped
+
+  # ---------- Ops server (GPSOpsServer, com.gps.os) ----------
+  # Email, Telegram, Discord, Twitter and the scheduled jobs. Called by Core only; never exposed to the internet.
+  gnpopsserver:
+    container_name: ${OPS_CONTAINER_NAME}
+    image: ${OPS_IMAGE_REPO:-goldnpay-ops-server}:${OPS_IMAGE_TAG:?set OPS_IMAGE_TAG in the env file or pass a version to the startup script}
+
+    env_file:
+      - ${DB_SECRETS_PATH}
+      - ${APP_SECRETS_PATH}    # also holds MAIL_*, TGM_*, DISCORD_*, TWITTER_* (kept outside the repo)
+
+    environment:
+      ENV: ${ENV}
+      SERVER_PORT: ${OPS_PORT_INTERNAL}
+      LOG_LEVEL: ${OPS_LOG_LEVEL:-INFO}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT_INTERNAL}
+      MYSQL_SCHEMA: ${MYSQL_SCHEMA}
+      CORE_BASE_URL: http://${CORE_CONTAINER_NAME}:${CORE_PORT_INTERNAL}
+      SUPPORT_VOLUME: /app/server/serverlogs
+      HOME: /tmp               # fontconfig/AWT cache location on the read-only root filesystem
+
+    volumes:
+      - ${PROJECT_VOLUME}/${OPS_VOLUME}:/app/server
+
+    ports:
+      - "${OPS_BIND_ADDRESS:-127.0.0.1}:${OPS_PORT_EXTERNAL}:${OPS_PORT_INTERNAL}"
+
+    # Ops only validates the schema; Core's Flyway must have created it first. Waiting for Core to be
+    # healthy (not merely started) is what makes a first start on an empty database work.
+    depends_on:
+      gnpcoreserver:
+        condition: service_healthy
+
+    networks:
+      - goldnpay_net
+
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    restart: unless-stopped
 
 networks:
   goldnpay_net:

@@ -33,3 +33,34 @@ h4 {
     scroll-behavior: auto !important;
   }
 }
+
+/* Gold underline that sweeps under section headings. */
+.heading-accent {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+.heading-accent::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 3.5rem;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, theme('colors.accent'), theme('colors.sand'));
+}
+
+.hero-gradient {
+  background: linear-gradient(120deg, #efeeda, #f8f7ea, #e6e3b8, #efeeda);
+  background-size: 300% 300%;
+  animation: gradient-shift 16s ease infinite;
+}
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}

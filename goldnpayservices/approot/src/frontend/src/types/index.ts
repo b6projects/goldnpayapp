@@ -32,8 +32,10 @@ export interface Loan {
 
 export interface Partner {
   name: string;
-  logo: string;
+  /** Short monogram shown in the text badge. */
+  short: string;
   type: 'Bank' | 'NBFC' | 'HFC';
+  sector: 'Public' | 'Private';
 }
 
 export interface Testimonial {

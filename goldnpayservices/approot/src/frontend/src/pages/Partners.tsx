@@ -1,5 +1,6 @@
 import Section from '../components/ui/Section';
 import Disclaimer from '../components/ui/Disclaimer';
+import BankBadge from '../components/ui/BankBadge';
 import { partners } from '../data/partners';
 
 export default function Partners() {
@@ -21,8 +22,12 @@ export default function Partners() {
           <tbody>
             {partners.map((p) => (
               <tr key={p.name} className="border-b border-surface">
-                <td className="py-2 pr-4">{p.name}</td>
-                <td className="py-2">{p.type}</td>
+                <td className="py-2 pr-4">
+                  <BankBadge partner={p} />
+                </td>
+                <td className="py-2">
+                  {p.sector} sector {p.type.toLowerCase()}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -30,7 +35,7 @@ export default function Partners() {
       </div>
       <div className="mt-6">
         <Disclaimer>
-          This list is an indicative placeholder pending the owner&apos;s permission to show real partner names.
+          This is an indicative list of banks. Names are shown as text for identification only, no logos are used, and all names and trademarks belong to their respective owners. Listing does not imply endorsement.
         </Disclaimer>
       </div>
     </Section>

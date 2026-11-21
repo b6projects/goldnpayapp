@@ -57,7 +57,7 @@ env_value() {
 NETWORK_NAME="$(env_value NETWORK_NAME)"
 [ -n "$NETWORK_NAME" ] || { echo "ERROR: NETWORK_NAME missing in $ENV_FILE" >&2; exit 1; }
 
-# A version argument overrides CLIENT_IMAGE_TAG / SERVER_IMAGE_TAG from the env file
+# A version argument overrides CLIENT_IMAGE_TAG / CORE_IMAGE_TAG / OPS_IMAGE_TAG from the env file
 # (shell variables take precedence over --env-file in Compose).
 if [ -n "$VERSION" ]; then
     if [[ ! "$VERSION" =~ ^([0-9]+\.[0-9]+\.[0-9]+|latest)$ ]]; then
@@ -65,7 +65,8 @@ if [ -n "$VERSION" ]; then
         exit 1
     fi
     export CLIENT_IMAGE_TAG="$VERSION"
-    export SERVER_IMAGE_TAG="$VERSION"
+    export CORE_IMAGE_TAG="$VERSION"
+    export OPS_IMAGE_TAG="$VERSION"
 fi
 
 compose() {
@@ -106,6 +107,23 @@ ensure_volume_dirs() {
     fi
 }
 
+
+# Core and Ops run as uid 10001 inside the container; their data folders must exist and be writable by it.
+ensure_app_dirs() {
+    local base dir
+    base="$(env_value PROJECT_VOLUME)"
+    [ -n "$base" ] || return 0
+    for dir in "$(env_value CORE_VOLUME)" "$(env_value OPS_VOLUME)"; do
+        [ -n "$dir" ] || continue
+        if [ ! -d "$base/$dir/serverlogs" ]; then
+            echo "Creating data folder $base/$dir"
+            mkdir -p "$base/$dir/serverlogs" || echo "WARNING: could not create $base/$dir (create it with sudo)"
+        fi
+        chown -R 10001:10001 "$base/$dir" 2> /dev/null \
+            || echo "NOTE: could not chown $base/$dir to 10001 (run: sudo chown -R 10001:10001 $base/$dir)"
+    done
+}
+
 echo "######################## ${ENV_UPPER} ${STACK} : ${ACTION} ###################################"
 echo "Docker folder : $DOCKER_HOME"
 echo "Project       : $PROJECT_NAME"
@@ -116,6 +134,7 @@ case "$ACTION" in
     up)
         ensure_network
         [ "$STACK" = "db" ] && ensure_volume_dirs
+        [ "$STACK" = "app" ] && ensure_app_dirs
         check_images || true
         compose up -d
         echo "######################## ${ENV_UPPER} ${STACK} startup complete ###################################"

@@ -1,8 +1,18 @@
 import { Link } from 'react-router-dom';
-import { ArrowRightLeft, Briefcase, Building2, Car, Coins, Home, Landmark, User } from 'lucide-react';
+import {
+  ArrowRightLeft,
+  Briefcase,
+  Building2,
+  Car,
+  Coins,
+  Home,
+  Landmark,
+  User,
+} from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Section from '../ui/Section';
 import Card from '../ui/Card';
+import Reveal from '../ui/Reveal';
 import Disclaimer from '../ui/Disclaimer';
 import { loans } from '../../data/loans';
 
@@ -19,14 +29,17 @@ const ICONS: Record<string, LucideIcon> = {
 export default function LoanGrid() {
   return (
     <Section aria-labelledby="loans-heading">
-      <h2 id="loans-heading" className="mb-8 text-2xl font-bold text-text md:text-3xl">
-        Our loan products
+      <h2
+        id="loans-heading"
+        className="heading-accent mb-8 text-2xl font-bold text-text md:text-3xl"
+      >
+        Loan products
       </h2>
       <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {loans.map((loan) => {
+        {loans.map((loan, i) => {
           const Icon = ICONS[loan.icon] ?? Landmark;
           return (
-            <li key={loan.slug}>
+            <Reveal as="li" key={loan.slug} delay={(i % 4) * 100}>
               <Card className="flex h-full flex-col">
                 <Icon aria-hidden="true" className="h-8 w-8 text-primary" />
                 <h3 className="mt-3 text-lg font-semibold text-text">{loan.title}</h3>
@@ -42,13 +55,14 @@ export default function LoanGrid() {
                   Learn more
                 </Link>
               </Card>
-            </li>
+            </Reveal>
           );
         })}
       </ul>
       <div className="mt-6">
         <Disclaimer>
-          Rates shown are indicative and subject to the lender&apos;s policy and your credit profile.
+          Rates shown are indicative and subject to the lender&apos;s policy and your credit
+          profile.
         </Disclaimer>
       </div>
     </Section>

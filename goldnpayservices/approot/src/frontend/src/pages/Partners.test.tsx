@@ -7,7 +7,7 @@ afterEach(cleanup);
 
 describe('Partners page', () => {
   it('renders the exact intro and a Name/Type table with one row per partner', () => {
-    const { container } = render(<Partners />);
+    render(<Partners />);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(
       screen.getByText(
@@ -17,6 +17,7 @@ describe('Partners page', () => {
     expect(screen.getByRole('columnheader', { name: 'Name' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Type' })).toBeInTheDocument();
     expect(screen.getAllByRole('row')).toHaveLength(partners.length + 1);
-    expect(container.textContent).not.toMatch(/HDFC|ICICI|\bSBI\b|Axis Bank|Kotak|Bajaj/i);
+    expect(screen.getByText('State Bank of India')).toBeInTheDocument();
+    expect(screen.getByText('HDFC Bank')).toBeInTheDocument();
   });
 });

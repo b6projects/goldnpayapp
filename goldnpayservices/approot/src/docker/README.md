@@ -9,10 +9,11 @@ Modelled on the GoldBucks setup (`GoldBucks-App/docker`, `scripts/lnbuildimages`
 | `frontend/Dockerfile` | Multi-stage image: `npm ci` + `npm run build`, then a small runtime with `dist/` and the Express server. Non-root, health-checked. |
 | `frontend/.dockerignore` | Keeps `node_modules`, `dist`, `coverage`, `.env*` out of the build. |
 | `frontend/server/` | `server.js` (one server for all environments) and its own `package.json` / lockfile (Express only). |
-| `docker/docker-compose-app.yml` | `gnpclient` (frontend). A `gnpserver` (backend) block is ready but commented out. |
+| `backend/gpscoreserver/`, `backend/gpsopsserver/` | The Core and Ops Spring Boot servers, each with its own `Dockerfile` (multi-stage, tests run in the build, non-root, health-checked). |
+| `docker/docker-compose-app.yml` | `gnpclient` (frontend), `gnpcoreserver` and `gnpopsserver`. |
 | `docker/docker-compose-coredb.yml` | MySQL 8.4, bound to `127.0.0.1`, credentials from a secrets file outside git. |
 | `docker/.env.dev` / `.env.uat` / `.env.prd` | Per-environment settings. **No secrets.** |
-| `scripts/lbuildscripts/` | `build-all.sh`, `build-frontend.sh`, `buildconstants.sh`, `version-utils.sh`. |
+| `scripts/lbuildscripts/` | `build-all.sh`, `build-frontend.sh`, `build-backend-core.sh`, `build-backend-ops.sh`, `buildconstants.sh`, `version-utils.sh`. |
 | `scripts/lstartupscripts/` | `stack.sh` plus wrappers `<env>-<app|db>-<up|down>.sh`. |
 
 ## Build
@@ -22,9 +23,11 @@ cd approot/src/scripts/lbuildscripts
 ./build-all.sh            # auto version: highest goldnpay-* tag + 1, or 1.0.0
 ./build-all.sh 1.2.0      # explicit version
 ./build-frontend.sh       # frontend only
+./build-backend-core.sh   # Core server only
+./build-backend-ops.sh    # Ops server only (needs BuildKit: it reads Core's schema script)
 ```
 
-Each build tags `goldnpay-frontend:<version>` and `goldnpay-frontend:latest`. A version that already exists is refused.
+`build-all.sh` builds `goldnpay-core-server`, `goldnpay-ops-server` and `goldnpay-frontend` with one shared version, each also tagged `:latest`. A version that already exists is refused. The backend builds run the unit and integration tests, so a red test fails the image.
 
 ## Run
 
@@ -41,11 +44,11 @@ cd approot/src/scripts/lstartupscripts
 The scripts create the Docker network named in the env file if it doesn't exist
 (`goldnpay-net-dev`, `goldnpay-net-uat`, `goldnpay-net`).
 
-| Env | Client port | Compose project | Network | Backend port (later) | MySQL port (host-only) |
+| Env | Client port | Compose project | Network | Core / Ops port (host-only) | MySQL port (host-only) |
 |---|---|---|---|---|---|
-| DEV | 3060 | `gnp-dev-app` / `gnp-dev-db` | `goldnpay-net-dev` | 8220 | 3316 |
-| UAT | 3061 | `gnp-uat-app` / `gnp-uat-db` | `goldnpay-net-uat` | 8221 | 3317 |
-| PRD | 3062 | `gnp-prd-app` / `gnp-prd-db` | `goldnpay-net` | 8222 | 3318 |
+| DEV | 3060 | `gnp-dev-app` / `gnp-dev-db` | `goldnpay-net-dev` | 8220 / 8230 | 3316 |
+| UAT | 3061 | `gnp-uat-app` / `gnp-uat-db` | `goldnpay-net-uat` | 8221 / 8231 | 3317 |
+| PRD | 3062 | `gnp-prd-app` / `gnp-prd-db` | `goldnpay-net` | 8222 / 8232 | 3318 |
 
 ## Runtime config in the browser
 
@@ -63,7 +66,7 @@ The app doesn't read it yet. When it needs runtime values, add this line to
 
 `/health` returns `{"status":"UP","env":"PRD","version":"1.0.3"}`.
 
-## Database (when the backend lands)
+## Database
 
 1. On the server, create the secrets file named by `DB_SECRETS_PATH`, e.g.
    `/opt/goldnpay/secrets/prd-db.env` (chmod 600):
@@ -74,15 +77,46 @@ The app doesn't read it yet. When it needs runtime values, add this line to
    ```
 2. `./prd-db-up.sh` — data lives in `${PROJECT_VOLUME}/mysql` (`/opt/goldnpay/prd/mysql`).
 3. Containers reach MySQL at host `gnp-prd-db`, port `3306`.
+4. The schema is created by **Core's Flyway** on its first start. There is nothing to load by hand.
 
-## Adding the backend
+## Backend: Core and Ops
 
-1. Add `backend/Dockerfile` and `scripts/lbuildscripts/build-backend.sh`
-   (same shape as `build-frontend.sh`, using `BACKEND_HOME` / `BACKEND_REPO`).
-   `build-all.sh` picks it up automatically.
-2. Uncomment `gnpserver` in `docker-compose-app.yml`, add `depends_on: [gnpserver]`
-   to `gnpclient`, and set `API_HOST` in each env file.
-3. Put app secrets in the file named by `APP_SECRETS_PATH`.
+| Server | Image | Container | Host port (loopback) | Role |
+|---|---|---|---|---|
+| Core | `goldnpay-core-server` | `gnp-<env>-core` | 8220 / 8221 / 8222 | Users, auth, KYC, settings, gold rate, reports. The reverse proxy exposes its public routes (`/tc/v1/public`, `/auth`, `/client`, ...). Owns the database schema. |
+| Ops | `goldnpay-ops-server` | `gnp-<env>-ops` | 8230 / 8231 / 8232 | Email, Telegram, Discord, Twitter, scheduled jobs. Called by Core only. **Never** route it through the proxy. |
+
+Core calls Ops at `http://gnp-<env>-ops:8080` and Ops calls Core at `http://gnp-<env>-core:8080`, both on the Docker network.
+Ops waits for Core to be **healthy** (not just started): Ops only validates the schema, so Core's migration must have run first.
+
+**Secrets file** (`APP_SECRETS_PATH`, e.g. `/opt/goldnpay/secrets/prd-app.env`, chmod 600). Both servers read it, and each
+refuses to start, naming the variable, if one it needs is missing:
+
+```
+# shared
+JWT_SECRET_KEY=<256-bit key, Base64>           # same value for Core and Ops
+CORE_TO_OPS_API_KEY=<32+ random bytes, Base64> # Core calls Ops
+OPS_TO_CORE_API_KEY=<32+ random bytes, Base64> # Ops calls Core (a different value)
+# Core
+FIELD_ENCRYPTION_KEY=<32 bytes, Base64>        # AES-256 key for bank account numbers. Losing it loses the data.
+# Ops
+MAIL_HOST=...  MAIL_PORT=587  MAIL_USERNAME=...  MAIL_PASSWORD=...  MAIL_FROM=...  MAIL_REPLY_TO=...
+TGM_SUPPORT_BOT_USERNAME=...  TGM_SUPPORT_BOT_TOKEN=...
+TGM_PR_BOT_USERNAME=...       TGM_PR_BOT_TOKEN=...       TGM_PR_CHANNEL_ID=@channel-or-numeric-id
+DISCORD_WEBHOOK_URL=...
+TWITTER_API_KEY=...  TWITTER_API_SECRET=...  TWITTER_ACCESS_TOKEN=...  TWITTER_ACCESS_SECRET=...
+```
+
+Generate a key with `openssl rand -base64 32`. Rotate an API key by changing it in this file and restarting both servers.
+Core and Ops share one `APP_SECRETS_PATH` file only for convenience; each variable is read by one or both as noted above.
+
+**First admin.** Set `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` in the secrets file for the first start only. Core
+creates an ADMIN when none exists. Remove both afterwards.
+
+**Data folders.** `${PROJECT_VOLUME}/core` (KYC documents, images, logs; back it up) and `${PROJECT_VOLUME}/ops` (logs) are
+mounted at `/app/server`. The containers run as uid `10001`; the startup script creates the folders and tries to `chown` them.
+
+`ENV` (`DEV`/`UAT`/`PRD`) picks the Spring profile. Swagger UI is on in DEV and UAT and off in PRD.
 
 ## Windows notes
 

@@ -3,11 +3,11 @@ import { describe, expect, it } from 'vitest';
 import { site } from '../config/site';
 import { faqs } from './faqs';
 import { loans } from './loans';
-import { partners } from './partners';
 import { stats } from './stats';
 import { testimonials } from './testimonials';
 
-const corpus = JSON.stringify({ site, loans, partners, testimonials, faqs, stats });
+// Partners are excluded: the Indian bank list is intentional and shown as text badges.
+const corpus = JSON.stringify({ site, loans, testimonials, faqs, stats });
 
 // Raw source of the content pages added in GPS-10 (M9).
 const pageSources = Object.values(

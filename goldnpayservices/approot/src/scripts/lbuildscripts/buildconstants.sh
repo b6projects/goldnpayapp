@@ -13,9 +13,13 @@ readonly PROJECT_ROOT
 
 readonly FRONTEND_HOME="$PROJECT_ROOT/frontend"
 readonly BACKEND_HOME="$PROJECT_ROOT/backend"
+readonly CORE_HOME="$BACKEND_HOME/gpscoreserver"
+readonly OPS_HOME="$BACKEND_HOME/gpsopsserver"
 readonly DOCKERFILE="Dockerfile"
 
 readonly FRONTEND_REPO="goldnpay-frontend"
-readonly BACKEND_REPO="goldnpay-backend"
+readonly CORE_REPO="goldnpay-core-server"
+readonly OPS_REPO="goldnpay-ops-server"
 
 readonly NODE_VERSION="24.20.0"
+readonly JAVA_VERSION="25"
