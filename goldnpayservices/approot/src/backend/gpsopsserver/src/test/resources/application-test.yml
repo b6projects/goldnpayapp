@@ -46,7 +46,13 @@ spring:
 app:
   mail:
     backoff-ms: 10
+  # The integrations default to off in production; tests exercise them (SocialDisabledFlagTest switches some off).
   telegram:
+    enabled: true
     polling-enabled: false
+  discord:
+    enabled: true
+  twitter:
+    enabled: true
   schedule:
     enabled: false

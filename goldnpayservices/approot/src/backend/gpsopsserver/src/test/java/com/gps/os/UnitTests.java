@@ -99,7 +99,7 @@ class UnitTests {
                         .web(WebApplicationType.NONE)
                         .properties("spring.profiles.active=nosuchprofile")
                         // command-line arguments outrank application.yml (builder properties would not)
-                        .run("--app.telegram.enabled=false", "--app.twitter.enabled=false"));
+                        .run("--app.telegram.enabled=false", "--app.twitter.enabled=false", "--app.discord.enabled=true"));
         assertThat(failure).hasStackTraceContaining("JWT_SECRET_KEY").hasStackTraceContaining("DISCORD_WEBHOOK_URL");
         var trace = new java.io.StringWriter();
         failure.printStackTrace(new java.io.PrintWriter(trace));
@@ -109,7 +109,8 @@ class UnitTests {
     @Test
     void server_refuses_to_start_when_secrets_are_missing_and_names_them() {
         assertThatThrownBy(() -> new SpringApplicationBuilder(GpsOpsServerApplication.class)
-                .web(WebApplicationType.NONE).properties("spring.profiles.active=nosuchprofile").run())
+                .web(WebApplicationType.NONE).properties("spring.profiles.active=nosuchprofile")
+                        .run("--app.telegram.enabled=true", "--app.discord.enabled=true", "--app.twitter.enabled=true"))
                 .hasStackTraceContaining("Missing required configuration")
                 .hasStackTraceContaining("JWT_SECRET_KEY")
                 .hasStackTraceContaining("MAIL_PASSWORD")
