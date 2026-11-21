@@ -102,144 +102,164 @@ export default function EmiCalculator({ loan, allowLoanSwitch = false }: EmiCalc
   };
 
   return (
-    <Card className="space-y-6" aria-labelledby="emi-calc-heading">
-      <h2 id="emi-calc-heading" className="text-xl font-bold text-text">
+    <Card className="space-y-4 p-4 lg:p-5" aria-labelledby="emi-calc-heading">
+      <h2 id="emi-calc-heading" className="text-lg font-bold text-text">
         EMI calculator
       </h2>
 
-      {allowLoanSwitch && (
-        <Select label="Loan type" value={slug} onChange={(e) => switchLoan(e.target.value)}>
-          {loans.map((l) => (
-            <option key={l.slug} value={l.slug}>
-              {l.title}
-            </option>
-          ))}
-        </Select>
-      )}
+      <div className="grid gap-4 lg:grid-cols-2 lg:gap-8">
+        <div className="space-y-3">
+          {allowLoanSwitch && (
+            <Select label="Loan type" value={slug} onChange={(e) => switchLoan(e.target.value)}>
+              {loans.map((l) => (
+                <option key={l.slug} value={l.slug}>
+                  {l.title}
+                </option>
+              ))}
+            </Select>
+          )}
 
-      <SliderField
-        label="Loan amount"
-        name="Amount"
-        value={amount}
-        min={ranges.amount.min}
-        max={ranges.amount.max}
-        step={10_000}
-        format={formatINR}
-        onChange={(v) => setValues((s) => ({ ...s, amount: v }))}
-      />
-      <SliderField
-        label="Interest rate (% p.a.)"
-        name="Rate"
-        value={rate}
-        min={ranges.rate.min}
-        max={ranges.rate.max}
-        step={0.05}
-        decimals={2}
-        format={formatRate}
-        onChange={(v) => setValues((s) => ({ ...s, rate: v }))}
-      />
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-sm font-medium text-text">Tenure unit</span>
-          <div
-            role="group"
-            aria-label="Tenure unit"
-            className="inline-flex overflow-hidden rounded-xl border border-muted"
-          >
-            <button
-              type="button"
-              aria-pressed={!inYears}
-              className={toggleClasses(!inYears)}
-              onClick={() => switchUnit('months')}
-            >
-              Months
-            </button>
-            <button
-              type="button"
-              aria-pressed={inYears}
-              disabled={!yearsAvailable}
-              className={`${toggleClasses(inYears)} disabled:opacity-50`}
-              onClick={() => switchUnit('years')}
-            >
-              Years
-            </button>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <SliderField
+              label="Loan amount"
+              name="Amount"
+              value={amount}
+              min={ranges.amount.min}
+              max={ranges.amount.max}
+              step={10_000}
+              format={formatINR}
+              onChange={(v) => setValues((s) => ({ ...s, amount: v }))}
+            />
+            <SliderField
+              label="Interest rate (% p.a.)"
+              name="Rate"
+              value={rate}
+              min={ranges.rate.min}
+              max={ranges.rate.max}
+              step={0.05}
+              decimals={2}
+              format={formatRate}
+              onChange={(v) => setValues((s) => ({ ...s, rate: v }))}
+            />
+          </div>
+          <div className="grid items-start gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <span className="block text-sm font-medium text-text">Tenure unit</span>
+              <div
+                role="group"
+                aria-label="Tenure unit"
+                className="inline-flex overflow-hidden rounded-xl border border-muted"
+              >
+                <button
+                  type="button"
+                  aria-pressed={!inYears}
+                  className={toggleClasses(!inYears)}
+                  onClick={() => switchUnit('months')}
+                >
+                  Months
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={inYears}
+                  disabled={!yearsAvailable}
+                  className={`${toggleClasses(inYears)} disabled:opacity-50`}
+                  onClick={() => switchUnit('years')}
+                >
+                  Years
+                </button>
+              </div>
+            </div>
+            {inYears ? (
+              <SliderField
+                key="years"
+                label="Tenure"
+                name="Tenure"
+                value={Math.round(months / 12)}
+                min={yearMin}
+                max={yearMax}
+                step={1}
+                format={formatYears}
+                onChange={(v) => setValues((s) => ({ ...s, months: v * 12 }))}
+              />
+            ) : (
+              <SliderField
+                key="months"
+                label="Tenure"
+                name="Tenure"
+                value={months}
+                min={ranges.months.min}
+                max={ranges.months.max}
+                step={1}
+                format={formatTenure}
+                onChange={(v) => setValues((s) => ({ ...s, months: v }))}
+              />
+            )}
           </div>
         </div>
-        {inYears ? (
-          <SliderField
-            key="years"
-            label="Tenure"
-            name="Tenure"
-            value={Math.round(months / 12)}
-            min={yearMin}
-            max={yearMax}
-            step={1}
-            format={formatYears}
-            onChange={(v) => setValues((s) => ({ ...s, months: v * 12 }))}
-          />
-        ) : (
-          <SliderField
-            key="months"
-            label="Tenure"
-            name="Tenure"
-            value={months}
-            min={ranges.months.min}
-            max={ranges.months.max}
-            step={1}
-            format={formatTenure}
-            onChange={(v) => setValues((s) => ({ ...s, months: v }))}
-          />
-        )}
-      </div>
 
-      <div>
-        <h3 className="sr-only">Results</h3>
-        <p className="text-sm text-muted">Monthly EMI (indicative)</p>
-        <p className="text-3xl font-bold text-primary" data-testid="emi-value">
-          {formatINR(summary.emi)}
-        </p>
-        <dl className="mt-4 grid gap-3 sm:grid-cols-3">
-          <div>
-            <dt className="text-sm text-muted">Principal</dt>
-            <dd className="font-semibold text-text" data-testid="principal-value">
-              {formatINR(amount)}
-            </dd>
+        <div className="space-y-3">
+          <div className="text-center">
+            <h3 className="sr-only">Results</h3>
+            <p className="text-sm text-muted">Monthly EMI (indicative)</p>
+            <p className="text-3xl font-bold text-primary" data-testid="emi-value">
+              {formatINR(summary.emi)}
+            </p>
+            <dl className="mt-2 grid grid-cols-3 gap-1 sm:gap-2">
+              <div>
+                <dt className="text-xs text-muted sm:text-sm">Principal</dt>
+                <dd
+                  className="text-sm font-semibold text-text sm:text-base"
+                  data-testid="principal-value"
+                >
+                  {formatINR(amount)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted sm:text-sm">Total interest</dt>
+                <dd
+                  className="text-sm font-semibold text-text sm:text-base"
+                  data-testid="interest-value"
+                >
+                  {formatINR(summary.totalInterest)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted sm:text-sm">Total payment</dt>
+                <dd
+                  className="text-sm font-semibold text-text sm:text-base"
+                  data-testid="total-value"
+                >
+                  {formatINR(summary.totalPayment)}
+                </dd>
+              </div>
+            </dl>
           </div>
-          <div>
-            <dt className="text-sm text-muted">Total interest</dt>
-            <dd className="font-semibold text-text" data-testid="interest-value">
-              {formatINR(summary.totalInterest)}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted">Total payment</dt>
-            <dd className="font-semibold text-text" data-testid="total-value">
-              {formatINR(summary.totalPayment)}
-            </dd>
-          </div>
-        </dl>
-      </div>
 
-      <div>
-        <div role="img" aria-label="Principal versus interest chart" aria-describedby={textId}>
-          <Suspense fallback={<div aria-hidden="true" className="h-[256px]" />}>
-            <EmiChart principal={amount} interest={summary.totalInterest} />
-          </Suspense>
+          <div>
+            <div role="img" aria-label="Principal versus interest chart" aria-describedby={textId}>
+              <Suspense fallback={<div aria-hidden="true" className="h-[210px]" />}>
+                <EmiChart principal={amount} interest={summary.totalInterest} />
+              </Suspense>
+            </div>
+            <p id={textId} className="text-center text-sm text-text">
+              Principal {principalPct}%, interest {interestPct}%
+            </p>
+          </div>
+
+          <div className="flex justify-center">
+            <LinkButton to={buildConsultationPath({ loan: activeLoan?.slug, amount })}>
+              Get best offers for this loan
+            </LinkButton>
+          </div>
         </div>
-        <p id={textId} className="mt-2 text-center text-sm text-text">
-          Principal {principalPct}%, interest {interestPct}%
-        </p>
       </div>
 
       <AmortizationTable
         principal={debounced.amount}
         ratePct={debounced.rate}
         months={debounced.months}
+        loanTitle={activeLoan?.title}
       />
-
-      <LinkButton to={buildConsultationPath({ loan: activeLoan?.slug, amount })}>
-        Get best offers for this loan
-      </LinkButton>
 
       <Disclaimer>
         Indicative estimate. Actual rate and EMI depend on the lender. Rates, EMI and amounts shown

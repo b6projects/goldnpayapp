@@ -1,0 +1,66 @@
+# ═══════════════════════════════════════════════════════
+#  GoldNPay database stack (MySQL)
+#
+#  Prepared for when the backend lands; not needed by the
+#  frontend today. Start with scripts/lstartupscripts/<env>-db-up.sh
+#
+#  Credentials are NOT in this repo. DB_SECRETS_PATH (set in the
+#  .env file) points to a file on the server, e.g.
+#  /opt/goldnpay/secrets/prd-db.env, containing:
+#     MYSQL_ROOT_PASSWORD=...
+#     MYSQL_USER=...
+#     MYSQL_PASSWORD=...
+#  (chmod 600, owned by the deploy user)
+# ═══════════════════════════════════════════════════════
+
+services:
+
+  gnpcoresqldb:
+    container_name: ${DB_CONTAINER_NAME}
+    image: ${MYSQL_IMAGE:-mysql:8.4}
+
+    env_file:
+      - path: ${DB_SECRETS_PATH:?set DB_SECRETS_PATH in the env file}
+        required: true
+
+    environment:
+      MYSQL_DATABASE: ${MYSQL_SCHEMA}
+      TZ: ${DB_TIMEZONE:-Asia/Kolkata}
+
+    volumes:
+      - ${PROJECT_VOLUME}/${DB_VOLUME}:/var/lib/mysql
+      # Schema / seed scripts run once, on first start with an empty data folder.
+      # Enable when approot/src/database has them:
+      # - ../database/init:/docker-entrypoint-initdb.d:ro
+
+    # Reachable only from the host itself (and from containers on the network).
+    ports:
+      - "127.0.0.1:${MYSQL_PORT_EXTERNAL}:${MYSQL_PORT_INTERNAL}"
+
+    networks:
+      goldnpay_net:
+        aliases:
+          - ${MYSQL_HOST}
+
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    restart: unless-stopped
+
+networks:
+  goldnpay_net:
+    external: true
+    name: ${NETWORK_NAME}

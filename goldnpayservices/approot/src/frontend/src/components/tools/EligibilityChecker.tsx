@@ -43,10 +43,12 @@ export default function EligibilityChecker() {
   const loan = loans.find((l) => l.slug === slug) ?? loans[0];
   const errorList = Object.values(errors).filter(Boolean);
 
-  const edit = <T,>(setter: (v: T) => void) => (v: T) => {
-    setter(v);
-    setResult(null);
-  };
+  const edit =
+    <T,>(setter: (v: T) => void) =>
+    (v: T) => {
+      setter(v);
+      setResult(null);
+    };
 
   const changeLoan = (next: string) => {
     const nextLoan = loans.find((l) => l.slug === next) ?? loans[0];

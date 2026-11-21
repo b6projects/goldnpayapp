@@ -6,10 +6,7 @@ Find them all with: `grep -rn "TODO(owner)" src`. The M10 README folds this list
 ## src/config/site.ts
 - Business name (`name`, currently "GoldNPay Services")
 - Production domain (`url`)
-- Phone, display format (`phone`) and `phoneE164`
-- WhatsApp number (`whatsapp`)
-- Email (`email`)
-- Office address (`address`)
+- (Done) Phone, WhatsApp and office address are set
 - Map embed URL (`mapEmbedUrl`, map is hidden while empty)
 - Cities served (`citiesServed`)
 - Grievance officer name, email and phone (`grievanceOfficer`)

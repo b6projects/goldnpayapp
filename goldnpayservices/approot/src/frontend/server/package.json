@@ -1,0 +1,17 @@
+{
+  "name": "goldnpay-frontend-server",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Runtime server for the GoldNPay frontend container: serves dist/ and /env-config.js",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.18"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

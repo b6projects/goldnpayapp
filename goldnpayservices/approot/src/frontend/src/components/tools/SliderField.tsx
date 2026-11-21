@@ -72,7 +72,7 @@ export default function SliderField({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       <Slider
         label={label}
         value={value}
@@ -85,7 +85,7 @@ export default function SliderField({
           commit(v);
         }}
       />
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-x-2">
         <input
           type="text"
           inputMode="decimal"
@@ -100,14 +100,14 @@ export default function SliderField({
               finalise();
             }
           }}
-          className="min-h-[44px] w-40 rounded-xl border border-muted bg-background px-3 py-2 text-base text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="min-h-[44px] w-32 rounded-xl border border-muted bg-background px-3 py-2 text-base text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         />
         {unitLabel && <span className="text-sm text-muted">{unitLabel}</span>}
         <span className="text-sm text-muted">
           {format(min)} to {format(max)}
         </span>
       </div>
-      <p id={messageId} aria-live="polite" className="min-h-[1.25rem] text-sm text-red-700">
+      <p id={messageId} aria-live="polite" className="text-sm text-red-700">
         {message}
       </p>
     </div>

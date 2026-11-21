@@ -1,0 +1,18 @@
+# Keep the build context small and avoid copying the host's
+# (Windows) node_modules over the Linux install in the image.
+node_modules
+**/node_modules
+dist
+coverage
+playwright-report
+test-results
+.env
+.env.*
+*.local
+*.log
+.git
+.gitignore
+.vscode
+.idea
+Dockerfile
+.dockerignore

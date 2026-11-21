@@ -6,10 +6,9 @@ describe('site config', () => {
     expect(site.name).toBeTruthy();
     expect(site.tagline).toBe('Find the right loan, with expert help.');
     expect(site.url).toBe('https://example.com');
-    expect(site.phone).toBe('+91 90000 00000');
-    expect(site.email).toBe('hello@example.com');
+    expect(site.phone).toBe('+91 87543 26019');
     expect(site.hours).toBe('Mon–Sat, 9:30 AM – 6:30 PM');
-    expect(site.address).toContain('TODO(owner)');
+    expect(site.address).toContain('Chrompet, Chennai 600044');
     expect(site.mapEmbedUrl).toBe('');
     expect(site.foundedYear).toBe(2024);
   });

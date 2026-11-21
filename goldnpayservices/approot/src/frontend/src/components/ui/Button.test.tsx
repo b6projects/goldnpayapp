@@ -10,7 +10,7 @@ describe('Button', () => {
     render(<Button>Save</Button>);
     const btn = screen.getByRole('button', { name: 'Save' });
     expect(btn).toHaveAttribute('type', 'button');
-    expect(btn.className).toContain('bg-primary');
+    expect(btn.className).toContain('bg-sand');
   });
 
   it.each([

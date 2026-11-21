@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Phone, MessageCircle, Mail, MapPin } from 'lucide-react';
+import { Phone, MessageCircle, MapPin } from 'lucide-react';
 import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
 import ConsultationForm from '../components/forms/ConsultationForm';
@@ -38,11 +38,6 @@ export default function Contact() {
             rel="noopener noreferrer"
           >
             Chat on WhatsApp
-          </a>
-        </ContactCard>
-        <ContactCard icon={<Mail aria-hidden="true" className="h-5 w-5" />} title="Email">
-          <a className={linkClass} href={`mailto:${site.email}`}>
-            {site.email}
           </a>
         </ContactCard>
         <ContactCard icon={<MapPin aria-hidden="true" className="h-5 w-5" />} title="Visit">

@@ -51,3 +51,12 @@ describe('AmortizationTable', () => {
     expect(screen.queryByRole('table', { name: /monthly breakdown/i })).toBeNull();
   });
 });
+
+describe('AmortizationTable downloads', () => {
+  it('offers PDF and Excel downloads without opening the schedule', () => {
+    render(<AmortizationTable principal={500000} ratePct={11} months={36} />);
+    expect(screen.getByRole('button', { name: 'Download PDF' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Download Excel' })).toBeEnabled();
+    expect(screen.queryByRole('table')).toBeNull();
+  });
+});

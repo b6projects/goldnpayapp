@@ -1,0 +1,94 @@
+# ═══════════════════════════════════════════════════════
+#  GoldNPay application stack (frontend now, backend later)
+#
+#  Values come from .env.<env> in this folder. Run through the
+#  startup scripts, e.g.  scripts/lstartupscripts/prd-app-up.sh
+#  or by hand:
+#    docker compose -p gnp-prd-app --env-file .env.prd -f docker-compose-app.yml up -d
+#
+#  The network is created by the startup scripts (external here)
+#  so the app and database stacks can be started separately.
+# ═══════════════════════════════════════════════════════
+
+services:
+
+  # ---------- Frontend (React app served by Express) ----------
+  gnpclient:
+    container_name: ${CLIENT_CONTAINER_NAME}
+    image: ${CLIENT_IMAGE_REPO:-goldnpay-frontend}:${CLIENT_IMAGE_TAG:?set CLIENT_IMAGE_TAG in the env file or pass a version to the startup script}
+
+    environment:
+      APP_ENV: ${ENV}
+      PORT: ${CLIENT_PORT_INTERNAL}
+      # Published to the browser as window.env.* (no secrets here).
+      VITE_API_HOST: ${API_HOST:-}
+      VITE_SITE_URL: ${SITE_URL:-}
+
+    ports:
+      - "${CLIENT_BIND_ADDRESS:-0.0.0.0}:${CLIENT_PORT_EXTERNAL}:${CLIENT_PORT_INTERNAL}"
+
+    networks:
+      - goldnpay_net
+
+    # Hardening: the server only reads files, so the root filesystem is read-only.
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    restart: unless-stopped
+
+  # ---------- Backend (enable once approot/src/backend exists) ----------
+  # Mirrors the GoldBucks coreserver service. Uncomment, add the
+  # SERVER_* / MYSQL_* values to each .env file, and add
+  # "depends_on: [gnpserver]" to gnpclient.
+  #
+  # gnpserver:
+  #   container_name: ${SERVER_CONTAINER_NAME}
+  #   image: ${SERVER_IMAGE_REPO:-goldnpay-backend}:${SERVER_IMAGE_TAG}
+  #
+  #   env_file:
+  #     - ${DB_SECRETS_PATH}     # MYSQL_USER, MYSQL_PASSWORD (kept outside the repo)
+  #     - ${APP_SECRETS_PATH}    # JWT secret, SMTP, provider API keys (kept outside the repo)
+  #
+  #   environment:
+  #     ENV: ${ENV}
+  #     MYSQL_HOST: ${MYSQL_HOST}
+  #     MYSQL_PORT: ${MYSQL_PORT_INTERNAL}
+  #     MYSQL_SCHEMA: ${MYSQL_SCHEMA}
+  #     SERVER_PORT: ${SERVER_PORT_INTERNAL}
+  #     LOG_LEVEL: ${SERVER_LOG_LEVEL:-INFO}
+  #     VOLUME_HOME: /app/server
+  #     SUPPORT_VOLUME: /app/server/serverlogs
+  #
+  #   volumes:
+  #     - ${PROJECT_VOLUME}/${SERVER_VOLUME}:/app/server
+  #
+  #   ports:
+  #     - "${SERVER_BIND_ADDRESS:-127.0.0.1}:${SERVER_PORT_EXTERNAL}:${SERVER_PORT_INTERNAL}"
+  #
+  #   networks:
+  #     - goldnpay_net
+  #
+  #   security_opt:
+  #     - no-new-privileges:true
+  #
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "5"
+  #
+  #   restart: unless-stopped
+
+networks:
+  goldnpay_net:
+    external: true
+    name: ${NETWORK_NAME}

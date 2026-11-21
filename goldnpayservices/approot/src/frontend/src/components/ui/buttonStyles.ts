@@ -5,7 +5,7 @@ const base =
   'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60';
 
 const variants: Record<ButtonVariant, string> = {
-  primary: 'bg-primary text-white hover:bg-primary/90',
+  primary: 'border border-accent bg-sand text-primary hover:bg-sand/80',
   secondary: 'border-2 border-primary bg-background text-primary hover:bg-surface',
   ghost: 'bg-transparent text-primary hover:bg-surface',
   // White on the WhatsApp green fails contrast, so dark text is used.

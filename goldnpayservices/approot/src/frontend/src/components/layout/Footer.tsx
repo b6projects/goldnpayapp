@@ -19,7 +19,8 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <h2 className={headingClass}>{site.name}</h2>
+            <h2 className="sr-only">{site.name}</h2>
+            <img src="/images/logo.png" alt="" width={80} height={80} className="mb-3 h-20 w-20" />
             <p className="text-sm text-text">{site.tagline}</p>
           </div>
           <div>
@@ -48,7 +49,6 @@ export default function Footer() {
             <h2 className={headingClass}>Contact</h2>
             <ul className="space-y-2 text-sm text-text">
               <li><a href={`tel:${site.phoneE164}`} className={linkClass}>{site.phone}</a></li>
-              <li><a href={`mailto:${site.email}`} className={linkClass}>{site.email}</a></li>
               <li>
                 <a href={waHref} target="_blank" rel="noopener noreferrer" className={linkClass}>
                   WhatsApp

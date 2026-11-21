@@ -92,7 +92,7 @@ function Drawer({ onClose }: { onClose: () => void }) {
         className="absolute right-0 top-0 flex h-full w-80 max-w-full flex-col gap-2 overflow-y-auto bg-background p-4 shadow-xl"
       >
         <div className="flex items-center justify-between">
-          <span className="font-heading text-lg font-semibold text-primary">{site.name}</span>
+          <img src="/images/logo.png" alt={site.name} width={48} height={48} className="h-12 w-12" />
           <button
             ref={closeRef}
             type="button"

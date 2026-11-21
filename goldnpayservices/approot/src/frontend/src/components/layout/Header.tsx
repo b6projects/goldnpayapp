@@ -7,7 +7,7 @@ import LinkButton from '../ui/LinkButton';
 import MobileNav from './MobileNav';
 
 const navClass =
-  'rounded-xl px-3 py-2 text-base font-medium text-text hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 aria-[current=page]:text-primary';
+  'rounded-xl px-3 py-2 text-base font-medium text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary aria-[current=page]:text-sand';
 
 const links: Array<[string, string]> = [
   ['/emi-calculator', 'EMI Calculator'],
@@ -64,7 +64,7 @@ function LoansMenu() {
       {open && (
         <ul
           id="loans-menu"
-          className="absolute left-0 top-full z-50 mt-1 w-64 rounded-xl border border-surface bg-background p-2 shadow-lg"
+          className="absolute left-0 top-full z-50 mt-1 w-64 rounded-xl border border-white/10 bg-primary p-2 shadow-lg"
         >
           {loans.map((loan) => (
             <li key={loan.slug}>
@@ -87,13 +87,13 @@ function LoansMenu() {
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   return (
-    <header className="sticky top-0 z-40 border-b border-surface bg-background">
+    <header className="sticky top-0 z-40 border-b border-accent/40 bg-primary">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
         <Link
           to="/"
-          className="rounded-xl font-heading text-lg font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          {site.name}
+          <img src="/images/logo-horizontal.svg" alt={site.name} width={212} height={48} className="h-12 w-auto" />
         </Link>
         <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
           <LoansMenu />
@@ -112,7 +112,7 @@ export default function Header() {
           aria-expanded={mobileOpen}
           aria-controls="mobile-nav"
           onClick={() => setMobileOpen(true)}
-          className="flex h-11 w-11 items-center justify-center rounded-xl text-text hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 lg:hidden"
+          className="flex h-11 w-11 items-center justify-center rounded-xl text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent lg:hidden"
         >
           <Menu aria-hidden="true" className="h-6 w-6" />
         </button>

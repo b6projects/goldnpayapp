@@ -15,14 +15,13 @@ function renderContact() {
 }
 
 describe('Contact page', () => {
-  it('renders four cards with correct links', () => {
+  it('renders three cards with correct links', () => {
     renderContact();
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-    for (const t of ['Call', 'WhatsApp', 'Email', 'Visit']) {
+    for (const t of ['Call', 'WhatsApp', 'Visit']) {
       expect(screen.getByRole('heading', { level: 2, name: t })).toBeInTheDocument();
     }
     expect(screen.getByRole('link', { name: site.phone })).toHaveAttribute('href', `tel:${site.phoneE164}`);
-    expect(screen.getByRole('link', { name: site.email })).toHaveAttribute('href', `mailto:${site.email}`);
     const wa = screen.getByRole('link', { name: 'Chat on WhatsApp' });
     expect(wa.getAttribute('href')).toContain(`https://wa.me/${site.whatsapp}`);
     expect(wa).toHaveAttribute('target', '_blank');

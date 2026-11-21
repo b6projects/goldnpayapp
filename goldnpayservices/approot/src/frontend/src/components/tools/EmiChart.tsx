@@ -5,7 +5,7 @@ export interface EmiChartProps {
   interest: number;
 }
 
-const SIZE = 220;
+const SIZE = 180;
 
 function prefersReducedMotion(): boolean {
   return typeof window !== 'undefined' && typeof window.matchMedia === 'function'
@@ -15,7 +15,7 @@ function prefersReducedMotion(): boolean {
 
 function ChartLegend() {
   return (
-    <ul className="mt-2 flex justify-center gap-4 text-sm text-text">
+    <ul className="mt-1 flex justify-center gap-4 text-sm text-text">
       <li className="flex items-center gap-2">
         <span aria-hidden="true" className="h-3 w-3 rounded-sm bg-primary" />
         Principal
@@ -36,13 +36,13 @@ export default function EmiChart({ principal, interest }: EmiChartProps) {
   ];
   return (
     <div data-testid="emi-chart" className="flex justify-center">
-      <PieChart width={SIZE} height={SIZE + 36} accessibilityLayer={false}>
+      <PieChart width={SIZE} height={SIZE + 30} accessibilityLayer={false}>
         <Pie
           data={data}
           dataKey="value"
           nameKey="name"
-          innerRadius={60}
-          outerRadius={95}
+          innerRadius={50}
+          outerRadius={78}
           stroke="none"
           isAnimationActive={!prefersReducedMotion()}
         >
