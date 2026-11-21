@@ -39,7 +39,7 @@ spring:
       write-dates-as-timestamps: false
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT:8088}
   error:
     include-stacktrace: never
     include-message: never
@@ -118,7 +118,8 @@ app:
   schedule:
     enabled: true
     zone: Asia/Kolkata
-    goldrate-cron: ${SCHEDULE_GOLDRATE_CRON:0 30 9,15 * * *}    
+    goldrate-cron: ${SCHEDULE_GOLDRATE_CRON:0 30 9,15 * * *}
+    inactive-cron: ${SCHEDULE_INACTIVE_CRON:0 0 10 * * *}
     cache-cron: ${SCHEDULE_CACHE_CRON:0 0/15 * * * *}
   reminders:
     after-days: 2
