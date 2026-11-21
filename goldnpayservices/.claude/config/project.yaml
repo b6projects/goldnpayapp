@@ -77,7 +77,7 @@ jira:
 # Git
 # ---------------------------------------------------------------------
 git:
-  source_branch: main                  # TODO version/release branch features come from
+  source_branch: release/version1.0        #Modify this to the branch you want to use as the source for new branches. This is usually the release branch.          
   sprint_branch:
     pattern: "sprint/{sprint_id}"
   feature_branch:
