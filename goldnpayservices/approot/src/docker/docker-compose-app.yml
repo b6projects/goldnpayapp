@@ -113,6 +113,7 @@ services:
     env_file:
       - ${DB_SECRETS_PATH}
       - ${APP_SECRETS_PATH}    # also holds MAIL_*, TGM_*, DISCORD_*, TWITTER_* (kept outside the repo)
+      - ${OPS_SECRETS_PATH}
 
     environment:
       ENV: ${ENV}
