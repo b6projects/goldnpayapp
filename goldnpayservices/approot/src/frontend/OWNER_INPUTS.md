@@ -17,6 +17,11 @@ Find them all with: `grep -rn "TODO(owner)" src`. The M10 README folds this list
 - Founding year (`foundedYear`)
 - Flags: set `showSampleTestimonials` to false once real testimonials are in; set `legalReviewed` to true after legal review of Privacy, Terms and Disclaimer
 
+## src/pages
+- `About.tsx`: founder story ("Our story") and the fee policy / how the business is paid ("How we're paid"). These live in the page, not in `src/data`.
+- Privacy, Terms and Disclaimer pages are template text: have them reviewed by a legal professional, then set `legalReviewed` in `src/config/site.ts` to true to remove the template banner. The Privacy page shows the grievance officer from `site.grievanceOfficer`.
+- Compliance note: the "explicit consent checkbox on every form" item stays pending until the real consultation form (GPS-9) ships.
+
 ## src/data
 - `faqs.ts`: fee policy answer to "Do you charge customers a fee?" and how the business is paid
 - `home.ts`: confirm the fee policy before keeping the "No-cost consultation" claim on the home page
