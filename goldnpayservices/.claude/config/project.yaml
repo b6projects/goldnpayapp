@@ -128,16 +128,16 @@ testing:
       log_filter: null
       dockerfile: approot/src/docker/backend.Dockerfile   # TODO confirm
     frontend:
-      stack: TODO                      # e.g. react
+      stack: react
       path: approot/src/frontend
-      install: null                    # TODO e.g. "npm ci"
-      build: null                      # TODO e.g. "npm run build"
-      unit_test: null                  # TODO e.g. "npm test -- --run"
-      test_parser: generic
-      package: null                    # TODO usually same as build, e.g. "npm run build"
-      artifacts: []                    # TODO e.g. ["dist/index.html", "dist/assets/*.js"]
-      lint: null                       # TODO e.g. "npx eslint {files}"
-      audit: null                      # TODO e.g. "npm audit --omit=dev"
+      install: "npm ci"
+      build: "npm run build"
+      unit_test: "npm test"
+      test_parser: vitest
+      package: "npm run build"
+      artifacts: ["dist/index.html", "dist/assets/*.js"]
+      lint: "npx eslint {files}"
+      audit: "npm audit --omit=dev"
       log_filter: null                 # e.g. "Module level directives"
       dockerfile: approot/src/docker/frontend.Dockerfile  # TODO confirm
   # Folders that hold code but have no configured tooling. Listed as NOT COVERED
