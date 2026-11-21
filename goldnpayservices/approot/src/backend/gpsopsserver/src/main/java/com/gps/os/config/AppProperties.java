@@ -32,15 +32,19 @@ public record AppProperties(
     public record Brand(String name, String siteUrl, String logoUrl, String address, String contact,
                         String unsubscribeUrl) {}
 
-    public record Telegram(@NotBlank String supportBotUsername, @NotBlank String supportBotToken,
-                           @NotBlank String prBotUsername, @NotBlank String prBotToken, @NotBlank String prChannelId,
+    /**
+     * Each social integration has an enabled flag. Its credentials are required (checked at startup by
+     * {@link RequiredConfigCheck}) only while the flag is on, so a disabled channel may leave them empty.
+     */
+    public record Telegram(boolean enabled, String supportBotUsername, String supportBotToken,
+                           String prBotUsername, String prBotToken, String prChannelId,
                            String apiBase, boolean pollingEnabled, int globalPerSecond, long perChatIntervalMs,
                            int maxPending) {}
 
-    public record Discord(@NotBlank String webhookUrl) {}
+    public record Discord(boolean enabled, String webhookUrl) {}
 
-    public record Twitter(@NotBlank String apiKey, @NotBlank String apiSecret, @NotBlank String accessToken,
-                          @NotBlank String accessSecret) {}
+    public record Twitter(boolean enabled, String apiKey, String apiSecret, String accessToken,
+                          String accessSecret) {}
 
     public record Schedule(boolean enabled, String zone, String goldrateCron, String inactiveCron, String cacheCron) {}
 

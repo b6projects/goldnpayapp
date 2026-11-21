@@ -1,5 +1,6 @@
 package com.gps.os.service;
 
+import com.gps.os.config.AppProperties;
 import com.gps.os.dto.MessagingDtos.LiveRate;
 import com.gps.os.dto.MessagingDtos.SocialPostRequest;
 import com.gps.os.dto.MessagingDtos.SocialPostResult;
@@ -7,6 +8,7 @@ import com.gps.os.entity.Channel;
 import com.gps.os.entity.NotificationLog;
 import com.gps.os.exception.ApiException;
 import com.gps.os.repository.AppSettingRepository;
+import jakarta.annotation.PostConstruct;
 import java.time.ZonedDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,10 +35,12 @@ public class SocialPublishService {
     private final ImageOverlayService overlay;
     private final AppPublicCache cache;
     private final List<ChannelPublisher> publishers;
+    private final AppProperties props;
 
     public SocialPublishService(AppSettingRepository settings, NotificationLogService logs, TgmPRBotService prBot,
                                 TelegramMessagingService messaging, ImageOverlayService overlay, AppPublicCache cache,
-                                List<ChannelPublisher> publishers) {
+                                List<ChannelPublisher> publishers, AppProperties props) {
+        this.props = props;
         this.settings = settings;
         this.logs = logs;
         this.prBot = prBot;
@@ -44,6 +48,26 @@ public class SocialPublishService {
         this.overlay = overlay;
         this.cache = cache;
         this.publishers = publishers;
+    }
+
+    @PostConstruct
+    void logIntegrationFlags() {
+        log.info("Social integrations: TELEGRAM={}, DISCORD={}, TWITTER={}", onOff(props.telegram().enabled()),
+                onOff(props.discord().enabled()), onOff(props.twitter().enabled()));
+    }
+
+    private static String onOff(boolean on) {
+        return on ? "enabled" : "disabled";
+    }
+
+    /** The deployment-level flag (app.<name>.enabled), as opposed to the SOCIAL setting in the database. */
+    private boolean integrationEnabled(String channel) {
+        return switch (channel) {
+            case TELEGRAM_PR -> props.telegram().enabled();
+            case "DISCORD" -> props.discord().enabled();
+            case "TWITTER" -> props.twitter().enabled();
+            default -> false;
+        };
     }
 
     private ChannelPublisher publisherFor(String channel) {
@@ -69,6 +93,12 @@ public class SocialPublishService {
         }
 
         for (String channel : channels) {
+            if (!integrationEnabled(channel)) {
+                log.warn("{} post skipped: the {} integration is disabled (app.{}.enabled=false)", channel, channel,
+                        channel.startsWith("TELEGRAM") ? "telegram" : channel.toLowerCase(Locale.ROOT));
+                results.put(channel, "SKIPPED_DISABLED");
+                continue;
+            }
             if (!enabled(channel)) {
                 results.put(channel, "SKIPPED_DISABLED");
                 continue;

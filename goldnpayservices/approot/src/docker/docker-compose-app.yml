@@ -122,6 +122,11 @@ services:
       MYSQL_PORT: ${MYSQL_PORT_INTERNAL}
       MYSQL_SCHEMA: ${MYSQL_SCHEMA}
       CORE_BASE_URL: http://${CORE_CONTAINER_NAME}:${CORE_PORT_INTERNAL}
+      # Social integration switches. A disabled one needs no credentials, is not started, and its requests
+      # are skipped with a warning in the log.
+      TELEGRAM_ENABLED: ${TELEGRAM_ENABLED:-true}
+      DISCORD_ENABLED: ${DISCORD_ENABLED:-true}
+      TWITTER_ENABLED: ${TWITTER_ENABLED:-true}
       SUPPORT_VOLUME: /app/server/serverlogs
       HOME: /tmp               # fontconfig/AWT cache location on the read-only root filesystem
 

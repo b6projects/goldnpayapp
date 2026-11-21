@@ -1,5 +1,6 @@
 package com.gps.os.service;
 
+import com.gps.os.config.AppProperties;
 import com.gps.os.dto.MessagingDtos.MessageAccepted;
 import com.gps.os.dto.MessagingDtos.TgmAppMessage;
 import com.gps.os.dto.MessagingDtos.TgmPrMessage;
@@ -11,11 +12,13 @@ import com.gps.os.exception.ApiException;
 import com.gps.os.integration.TelegramApiClient;
 import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /** Core -> Telegram messages: one linked user (support bot) or the PR channel (PR bot). Idempotent on requestId. */
+@Slf4j
 @Service
 public class TelegramMessagingService {
     private static final int MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -25,9 +28,12 @@ public class TelegramMessagingService {
     private final TelegramLinkService links;
     private final TgmPRBotService prBot;
     private final NotificationLogService logs;
+    private final boolean enabled;
 
     public TelegramMessagingService(@Qualifier("supportBotApi") TelegramApiClient supportApi, TelegramSender sender,
-                                    TelegramLinkService links, TgmPRBotService prBot, NotificationLogService logs) {
+                                    TelegramLinkService links, TgmPRBotService prBot, NotificationLogService logs,
+                                    AppProperties props) {
+        this.enabled = props.telegram().enabled();
         this.supportApi = supportApi;
         this.sender = sender;
         this.links = links;
@@ -35,7 +41,18 @@ public class TelegramMessagingService {
         this.logs = logs;
     }
 
+    /**
+     * Stops a Telegram request while the integration is off. 409 (not 5xx) so Core does not retry it.
+     */
+    private void requireEnabled(String what, String requestId) {
+        if (enabled) return;
+        log.warn("Telegram {} skipped (requestId={}): the Telegram integration is disabled (app.telegram.enabled=false)",
+                what, requestId);
+        throw new ApiException(HttpStatus.CONFLICT, "TELEGRAM_DISABLED", "The Telegram integration is disabled");
+    }
+
     public MessageAccepted sendAppMessage(TgmAppMessage m) {
+        requireEnabled("app message", m.requestId());
         TelegramLink link = links.byUser(m.userId()).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,
                 "TELEGRAM_NOT_LINKED", "The user has not linked Telegram"));
         var created = logs.createIfAbsent(m.requestId(), Channel.TELEGRAM, "APP_MESSAGE", m.userId(), "user:" + m.userId());
@@ -45,6 +62,7 @@ public class TelegramMessagingService {
     }
 
     public MessageAccepted sendPrMessage(TgmPrMessage m) {
+        requireEnabled("PR message", m.requestId());
         byte[] image = decodeImage(m.imageBase64());
         var created = logs.createIfAbsent(m.requestId(), Channel.TELEGRAM, "PR_MESSAGE", null, "pr-channel");
         if (!created.isNew()) return new MessageAccepted(m.requestId(), created.log().getStatus());

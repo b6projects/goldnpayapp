@@ -23,15 +23,21 @@ public class SupportBotMenuPublisher {
 
     private final TelegramApiClient api;
     private final boolean enabled;
+    private final boolean integrationEnabled;
 
     public SupportBotMenuPublisher(@Qualifier("supportBotApi") TelegramApiClient api, AppProperties props) {
         this.api = api;
+        this.integrationEnabled = props.telegram().enabled();
         this.enabled = props.telegram().pollingEnabled();
     }
 
     @Async
     @EventListener(ApplicationReadyEvent.class)
     public void publish() {
+        if (!integrationEnabled) {
+            log.warn("Support bot menu not published: the Telegram integration is disabled (app.telegram.enabled=false)");
+            return;
+        }
         if (!enabled) return;
         try {
             api.setMyCommands(COMMANDS);

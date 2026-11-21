@@ -23,7 +23,8 @@ public class DiscordPublisher implements ChannelPublisher {
 
     public DiscordPublisher(RestClient.Builder externalRestClientBuilder, AppProperties props) {
         this.client = externalRestClientBuilder.clone().build();
-        this.webhook = URI.create(props.discord().webhookUrl());
+        // A disabled integration is not initialised: no webhook is parsed and nothing can be posted.
+        this.webhook = props.discord().enabled() ? URI.create(props.discord().webhookUrl()) : null;
     }
 
     @Override
@@ -33,6 +34,7 @@ public class DiscordPublisher implements ChannelPublisher {
 
     @Override
     public void publish(String text, byte[] image) {
+        if (webhook == null) throw new IllegalStateException("Discord integration is disabled");
         String content = text.length() > LIMIT ? text.substring(0, LIMIT - 1) + "…" : text;
         try {
             if (image == null || image.length == 0) {

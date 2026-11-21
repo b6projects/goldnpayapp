@@ -3,6 +3,7 @@ package com.gps.os.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.gps.os.config.AppProperties;
 import com.gps.os.dto.MessagingDtos.LiveRate;
+import com.gps.os.exception.ApiException;
 import com.gps.os.integration.BotApiService;
 import com.gps.os.integration.TelegramApiClient;
 import com.gps.os.integration.TelegramApiException;
@@ -12,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /**
@@ -33,6 +35,7 @@ public class TgmSupportBotService implements SmartLifecycle {
     private final BotAuthorizationService authorization;
     private final AppPublicCache cache;
     private final boolean pollingEnabled;
+    private final boolean enabled;
 
     private volatile boolean running;
     private Thread poller;
@@ -47,11 +50,16 @@ public class TgmSupportBotService implements SmartLifecycle {
         this.authorization = authorization;
         this.cache = cache;
         this.pollingEnabled = props.telegram().pollingEnabled();
+        this.enabled = props.telegram().enabled();
     }
 
     // ---- linking (used by /start and by POST /cs/v1/bauth/tgmauthenticate) ----
 
     public LinkResult linkChat(String code, long chatId, String username) {
+        if (!enabled) {
+            log.warn("Telegram link skipped: the Telegram integration is disabled (app.telegram.enabled=false)");
+            throw new ApiException(HttpStatus.CONFLICT, "TELEGRAM_DISABLED", "The Telegram integration is disabled");
+        }
         BotApiService.VerifyResult v = core.verifyLinkCode(code.trim());
         if (!v.reachable()) return new LinkResult(LinkOutcome.CORE_UNAVAILABLE, null);
         if (!v.valid()) return new LinkResult(LinkOutcome.INVALID_CODE, null);
@@ -63,6 +71,12 @@ public class TgmSupportBotService implements SmartLifecycle {
     /** Removes the link for a user and tells the chat. Returns false when there was no link. */
     public boolean unlinkUser(Long userId) {
         Optional<Long> chat = links.unlinkUser(userId);
+        if (!enabled) { // the link is still removed, only the notice to the chat is skipped
+            if (chat.isPresent()) {
+                log.warn("Telegram disconnect notice skipped: the Telegram integration is disabled (app.telegram.enabled=false)");
+            }
+            return chat.isPresent();
+        }
         chat.ifPresent(c -> say(c, "You have been disconnected from GoldNPay. Send /start CODE to link again."));
         return chat.isPresent();
     }
@@ -137,6 +151,10 @@ public class TgmSupportBotService implements SmartLifecycle {
 
     @Override
     public void start() {
+        if (!enabled) {
+            log.warn("Telegram support bot not started: the Telegram integration is disabled (app.telegram.enabled=false)");
+            return;
+        }
         if (!pollingEnabled || running) return;
         running = true;
         poller = new Thread(this::pollLoop, "telegram-support-poller");

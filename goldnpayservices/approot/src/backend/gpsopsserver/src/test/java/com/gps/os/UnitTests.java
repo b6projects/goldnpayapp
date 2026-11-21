@@ -87,7 +87,23 @@ class UnitTests {
     }
 
     private static AppProperties props(String webhook) {
-        return new AppProperties("TEST", null, null, null, null, null, new AppProperties.Discord(webhook), null, null, null);
+        return new AppProperties("TEST", null, null, null, null, null, new AppProperties.Discord(true, webhook), null, null, null);
+    }
+
+    @Test
+    void disabled_social_integrations_need_no_credentials_but_enabled_ones_do() {
+        // Telegram and Twitter off: their credentials may be empty, startup must not complain about them.
+        // Everything else is still missing here, so the failure must name those and none of the disabled ones.
+        Throwable failure = org.assertj.core.api.Assertions.catchThrowable(
+                () -> new SpringApplicationBuilder(GpsOpsServerApplication.class)
+                        .web(WebApplicationType.NONE)
+                        .properties("spring.profiles.active=nosuchprofile")
+                        // command-line arguments outrank application.yml (builder properties would not)
+                        .run("--app.telegram.enabled=false", "--app.twitter.enabled=false"));
+        assertThat(failure).hasStackTraceContaining("JWT_SECRET_KEY").hasStackTraceContaining("DISCORD_WEBHOOK_URL");
+        var trace = new java.io.StringWriter();
+        failure.printStackTrace(new java.io.PrintWriter(trace));
+        assertThat(trace.toString()).doesNotContain("TGM_SUPPORT_BOT_TOKEN").doesNotContain("TWITTER_ACCESS_SECRET");
     }
 
     @Test

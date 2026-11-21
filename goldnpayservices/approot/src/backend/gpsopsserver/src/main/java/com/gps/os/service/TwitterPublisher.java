@@ -31,6 +31,8 @@ public class TwitterPublisher implements ChannelPublisher {
 
     @Override
     public void publish(String text, byte[] image) {
+        // The client is built lazily, so a disabled integration is never initialised; this stops a direct call.
+        if (!props.twitter().enabled()) throw new IllegalStateException("Twitter integration is disabled");
         String status = text.length() > LIMIT ? text.substring(0, LIMIT - 1) + "…" : text;
         try {
             StatusUpdate update = new StatusUpdate(status);

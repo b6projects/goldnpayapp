@@ -107,6 +107,13 @@ DISCORD_WEBHOOK_URL=...
 TWITTER_API_KEY=...  TWITTER_API_SECRET=...  TWITTER_ACCESS_TOKEN=...  TWITTER_ACCESS_SECRET=...
 ```
 
+**Social integrations on/off.** `TELEGRAM_ENABLED`, `DISCORD_ENABLED` and `TWITTER_ENABLED` (in `.env.<env>`, default
+`true`) switch each integration for Ops. While one is `true`, its credentials above are required and Ops refuses to start
+if any is empty. While it is `false`, its credentials may be left out of the secrets file, the integration is not started
+(`TELEGRAM_ENABLED` also stops the support bot's polling and menu), and every request for it is skipped with a `WARN`
+in the Ops log: social posts report `SKIPPED_DISABLED` for that channel, and Core's Telegram message and link calls get
+a `409 TELEGRAM_DISABLED`. The support and PR bots share the one Telegram flag.
+
 Generate a key with `openssl rand -base64 32`. Rotate an API key by changing it in this file and restarting both servers.
 Core and Ops share one `APP_SECRETS_PATH` file only for convenience; each variable is read by one or both as noted above.
 
