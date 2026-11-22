@@ -5,10 +5,13 @@ import Card from '../components/ui/Card';
 import ConsultationForm from '../components/forms/ConsultationForm';
 import { site } from '../config/site';
 import { buildWhatsAppUrl } from '../lib/whatsapp';
+import Seo from '../components/seo/Seo';
+import { pageSeo } from '../seo/pageSeo';
 
 function ContactCard({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
     <Card className="space-y-2">
+      <Seo {...pageSeo('/contact')} />
       <h2 className="flex items-center gap-2 text-lg font-semibold text-text">
         {icon}
         {title}

@@ -2,10 +2,13 @@ import Section from '../components/ui/Section';
 import Disclaimer from '../components/ui/Disclaimer';
 import BankBadge from '../components/ui/BankBadge';
 import { partners } from '../data/partners';
+import Seo from '../components/seo/Seo';
+import { pageSeo } from '../seo/pageSeo';
 
 export default function Partners() {
   return (
     <Section>
+      <Seo {...pageSeo('/partners')} />
       <h1 className="text-3xl font-bold text-text md:text-4xl">Partner Disclosure</h1>
       <p className="mt-3 max-w-3xl text-lg text-muted">
         We work with the following regulated entities. The final decision on any loan rests solely with the lender.

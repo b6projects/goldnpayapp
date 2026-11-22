@@ -59,6 +59,7 @@ docker build "${NO_CACHE[@]}" \
     --build-arg NODE_VERSION="$NODE_VERSION" \
     --build-arg APP_VERSION="$VERSION" \
     --build-arg GIT_COMMIT="$COMMIT" \
+    --build-arg VITE_SITE_URL="${VITE_SITE_URL:-}" \
     -t "$IMAGE_NAME" \
     -t "${REPO_NAME}:latest" \
     "$FRONTEND_HOME"

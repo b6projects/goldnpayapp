@@ -1,8 +1,11 @@
 import LegalPage from '../components/legal/LegalPage';
+import Seo from '../components/seo/Seo';
+import { pageSeo } from '../seo/pageSeo';
 
 export default function Terms() {
   return (
     <LegalPage title="Terms of Use">
+      <Seo {...pageSeo('/terms')} />
       <section aria-labelledby="t-service" className="space-y-2">
         <h2 id="t-service" className="text-xl font-semibold">Nature of our service</h2>
         <p>

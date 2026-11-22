@@ -2,11 +2,6 @@ import type { Faq } from '../types';
 
 export const faqs: Faq[] = [
   {
-    q: 'Do you charge customers a fee?',
-    a: 'TODO(owner): state the fee policy and how the business is paid.',
-    category: 'Fees',
-  },
-  {
     q: 'Are you a lender?',
     a: 'No. We are a loan consultant (DSA). We help you compare options and prepare applications, and the lender makes the lending decision.',
     category: 'General',

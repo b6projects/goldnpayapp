@@ -30,7 +30,6 @@ describe('owner inputs (AC3)', () => {
     expect(withMarker).toEqual(
       [
         'src/config/site.ts',
-        'src/data/faqs.ts',
         'src/data/home.ts',
         'src/data/partners.ts',
         'src/data/stats.ts',

@@ -1,9 +1,12 @@
 import Section from '../components/ui/Section';
 import LoanGrid from '../components/home/LoanGrid';
+import Seo from '../components/seo/Seo';
+import { pageSeo } from '../seo/pageSeo';
 
 export default function Loans() {
   return (
     <>
+      <Seo {...pageSeo('/loans')} />
       <Section className="pb-0 md:pb-0">
         <h1 className="text-3xl font-bold text-text md:text-4xl">Loan Types</h1>
         {/* TODO(owner): replace with approved intro copy */}

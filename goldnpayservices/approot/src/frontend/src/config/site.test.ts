@@ -5,7 +5,7 @@ describe('site config', () => {
   it('has the spec 5.1 string fields populated', () => {
     expect(site.name).toBeTruthy();
     expect(site.tagline).toBe('Find the right loan, with expert help.');
-    expect(site.url).toBe('https://example.com');
+    expect(site.url).toBe('https://goldnpay.in');
     expect(site.phone).toBe('+91 87543 26019');
     expect(site.hours).toBe('Mon–Sat, 9:30 AM – 6:30 PM');
     expect(site.address).toContain('Chrompet, Chennai 600044');
@@ -18,8 +18,8 @@ describe('site config', () => {
     expect(site.whatsapp).toMatch(/^\d+$/);
   });
 
-  it('lists cities served and grievance officer', () => {
-    expect(site.citiesServed).toEqual(['Chennai']);
+  it('lists the service area and grievance officer', () => {
+    expect(site.serviceArea).toBe('Tamil Nadu');
     expect(site.grievanceOfficer.name).toBeTruthy();
     expect(site.grievanceOfficer.email).toContain('@');
     expect(site.grievanceOfficer.phone).toBeTruthy();

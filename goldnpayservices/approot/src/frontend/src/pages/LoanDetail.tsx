@@ -7,6 +7,9 @@ import RelatedLoans from '../components/loans/RelatedLoans';
 import ConsultationForm from '../components/forms/ConsultationForm';
 import NotFound from './NotFound';
 import { getLoanBySlug } from '../data/loans';
+import Seo from '../components/seo/Seo';
+import { loanMeta } from '../seo/meta';
+import { breadcrumbSchema, faqSchema, loanProductSchema } from '../seo/schema';
 
 export default function LoanDetail() {
   const { slug = '' } = useParams();
@@ -15,6 +18,19 @@ export default function LoanDetail() {
 
   return (
     <Section>
+      <Seo
+        {...loanMeta(loan)}
+        path={`/loans/${loan.slug}`}
+        jsonLd={[
+          breadcrumbSchema([
+            { name: 'Home', path: '/' },
+            { name: 'Loans', path: '/loans' },
+            { name: loan.title, path: `/loans/${loan.slug}` },
+          ]),
+          loanProductSchema(loan),
+          faqSchema(loan.faqs),
+        ]}
+      />
       <div className="space-y-6">
         <Breadcrumb
           items={[{ label: 'Home', to: '/' }, { label: 'Loans', to: '/loans' }, { label: loan.title }]}

@@ -18,8 +18,9 @@ describe('faqs data', () => {
     expect(new Set(faqs.map((f) => f.q)).size).toBe(faqs.length);
   });
 
-  it('has the fee FAQ with a TODO(owner) answer', () => {
-    expect(find('Do you charge customers a fee?')?.a).toContain('TODO(owner)');
+  it('has the lender-fees FAQ and no unfinished answers', () => {
+    expect(find('Does the lender charge any fees?')).toBeDefined();
+    faqs.forEach((f) => expect(f.a).not.toContain('TODO(owner)'));
   });
 
   it('has the lender FAQ saying consultant/DSA', () => {

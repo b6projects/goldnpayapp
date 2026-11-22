@@ -2,6 +2,7 @@ import { lazy } from 'react';
 import type { RouteObject } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
+import SeoProvider from './seo/SeoProvider';
 
 const Loans = lazy(() => import('./pages/Loans'));
 const LoanDetail = lazy(() => import('./pages/LoanDetail'));
@@ -19,22 +20,27 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 
 export const routes: RouteObject[] = [
   {
-    element: <Layout />,
+    element: <SeoProvider />,
     children: [
-      { path: '/', element: <Home /> },
-      { path: '/loans', element: <Loans /> },
-      { path: '/loans/:slug', element: <LoanDetail /> },
-      { path: '/emi-calculator', element: <EmiCalculator /> },
-      { path: '/eligibility', element: <Eligibility /> },
-      { path: '/consultation', element: <Consultation /> },
-      { path: '/about', element: <About /> },
-      { path: '/faq', element: <Faq /> },
-      { path: '/contact', element: <Contact /> },
-      { path: '/partners', element: <Partners /> },
-      { path: '/privacy', element: <Privacy /> },
-      { path: '/terms', element: <Terms /> },
-      { path: '/disclaimer', element: <Disclaimer /> },
-      { path: '*', element: <NotFound /> },
+      {
+        element: <Layout />,
+        children: [
+          { path: '/', element: <Home /> },
+          { path: '/loans', element: <Loans /> },
+          { path: '/loans/:slug', element: <LoanDetail /> },
+          { path: '/emi-calculator', element: <EmiCalculator /> },
+          { path: '/eligibility', element: <Eligibility /> },
+          { path: '/consultation', element: <Consultation /> },
+          { path: '/about', element: <About /> },
+          { path: '/faq', element: <Faq /> },
+          { path: '/contact', element: <Contact /> },
+          { path: '/partners', element: <Partners /> },
+          { path: '/privacy', element: <Privacy /> },
+          { path: '/terms', element: <Terms /> },
+          { path: '/disclaimer', element: <Disclaimer /> },
+          { path: '*', element: <NotFound /> },
+        ],
+      },
     ],
   },
 ];

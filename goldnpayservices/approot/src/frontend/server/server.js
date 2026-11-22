@@ -16,7 +16,8 @@
 //    GET /env-config.js  runtime config for the browser (not cached)
 //    GET /health         liveness check used by the Docker HEALTHCHECK
 //    static files        from DIST_DIR (hashed /assets cached for a year)
-//    anything else       index.html, so client-side routes work on reload
+//    page routes         the prerendered <route>/index.html written by scripts/prerender.mjs
+//    anything else       404.html with status 404 (the app then shows its Not Found page)
 // ═══════════════════════════════════════════════════════
 import express from 'express';
 import fs from 'node:fs';
@@ -30,6 +31,7 @@ const PORT = Number(process.env.PORT || process.env.EXPOSE_PORT || 4173);
 const DIST_DIR = path.resolve(process.env.DIST_DIR || path.join(__dirname, '..', 'dist'));
 const APP_VERSION = process.env.APP_VERSION || 'dev';
 const INDEX_FILE = path.join(DIST_DIR, 'index.html');
+const NOT_FOUND_FILE = path.join(DIST_DIR, '404.html');
 
 // ---------- Runtime browser config ----------
 function buildPublicEnv() {
@@ -46,9 +48,11 @@ const publicEnv = buildPublicEnv();
 const envConfigJs = `window.env = ${JSON.stringify(publicEnv).replace(/</g, '\\u003c')};\n`;
 
 // ---------- index.html (read once, fail fast if missing) ----------
-let indexHtml;
+let notFoundHtml;
 try {
-  indexHtml = fs.readFileSync(INDEX_FILE, 'utf8');
+  fs.accessSync(INDEX_FILE);
+  // Fall back to index.html if a build predates prerendering.
+  notFoundHtml = fs.readFileSync(fs.existsSync(NOT_FOUND_FILE) ? NOT_FOUND_FILE : INDEX_FILE, 'utf8');
 } catch (err) {
   console.error(`FATAL: cannot read ${INDEX_FILE}: ${err.message}`);
   process.exit(1);
@@ -89,17 +93,33 @@ app.use(
   }),
 );
 
-// Everything else in dist/ (favicon, robots.txt, images ...). index.html is
-// served by the fallback below so it is never cached.
-app.use(express.static(DIST_DIR, { index: false, maxAge: '1h' }));
+// Everything else in dist/ (favicon, robots.txt, sitemap.xml, images ...). Page HTML is
+// served by the handler below so it is never cached; "redirect: false" stops express from
+// redirecting /loans to /loans/ before that handler runs.
+app.use(express.static(DIST_DIR, { index: false, redirect: false, maxAge: '1h' }));
 
-// SPA fallback: GET/HEAD for a route (no file extension) gets index.html.
-// A missing file such as /images/x.png gets a real 404 instead of HTML.
+// Prerendered pages: /loans/gold-loan is served from dist/loans/gold-loan/index.html.
+// Anything that is not a prerendered page gets the Not Found page with a real 404 status
+// (so search engines do not index junk URLs). A missing file such as /images/x.png gets a
+// plain 404 instead of HTML.
 app.use((req, res, next) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') return next();
   if (path.extname(req.path)) return res.status(404).type('text/plain').send('Not found');
+  let pathname;
+  try {
+    pathname = decodeURIComponent(req.path);
+  } catch {
+    return res.status(400).type('text/plain').send('Bad request');
+  }
+  const segments = pathname.split('/').filter(Boolean);
   res.setHeader('Cache-Control', 'no-cache');
-  res.type('html').send(indexHtml);
+  // Reject traversal and anything outside DIST_DIR before touching the filesystem.
+  const pageFile = path.join(DIST_DIR, ...segments, 'index.html');
+  if (!segments.includes('..') && pageFile.startsWith(DIST_DIR + path.sep) && fs.existsSync(pageFile)) {
+    return res.type('html').sendFile(pageFile);
+  }
+  if (segments.length === 0) return res.type('html').sendFile(INDEX_FILE);
+  res.status(404).type('html').send(notFoundHtml);
 });
 
 // Error handler (e.g. a missing /assets file from fallthrough:false).

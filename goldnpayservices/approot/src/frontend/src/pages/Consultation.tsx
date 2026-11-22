@@ -3,10 +3,13 @@ import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
 import { site } from '../config/site';
 import { buildWhatsAppUrl } from '../lib/whatsapp';
+import Seo from '../components/seo/Seo';
+import { pageSeo } from '../seo/pageSeo';
 
 export default function Consultation() {
   return (
     <Section>
+      <Seo {...pageSeo('/consultation')} />
       <h1 className="text-3xl font-bold text-text md:text-4xl">Get Free Consultation</h1>
       <Card className="mt-6 max-w-xl space-y-3">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-text">

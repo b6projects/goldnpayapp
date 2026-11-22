@@ -20,8 +20,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <h2 className="sr-only">{site.name}</h2>
-            <img src="/images/logo.png" alt="" width={80} height={80} className="mb-3 h-20 w-20" />
+            <img src="/images/logo.png" alt={`${site.name} logo`} width={80} height={80} className="mb-3 h-20 w-20" />
             <p className="text-sm text-text">{site.tagline}</p>
+            <p className="mt-2 text-sm text-text">Serving all of {site.serviceArea}</p>
           </div>
           <div>
             <h2 className={headingClass}>Loans</h2>

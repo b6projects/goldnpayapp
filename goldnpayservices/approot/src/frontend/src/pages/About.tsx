@@ -2,6 +2,8 @@ import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
 import LinkButton from '../components/ui/LinkButton';
 import { loans } from '../data/loans';
+import Seo from '../components/seo/Seo';
+import { pageSeo } from '../seo/pageSeo';
 
 const services = [
   {
@@ -48,12 +50,13 @@ const values = [
 export default function About() {
   return (
     <Section>
+      <Seo {...pageSeo('/about')} />
       <h1 className="text-3xl font-bold text-text md:text-4xl">About Us</h1>
 
       <section aria-labelledby="about-who" className="mt-6 max-w-3xl space-y-3">
         <h2 id="about-who" className="text-2xl font-bold text-text">Who we are</h2>
         <p className="text-base text-text">
-          GoldNPay Services is a loan consultancy based in Chennai. We work as a Direct Selling Agent
+          GoldNPay is a loan consultancy based in Chennai. We work as a Direct Selling Agent
           (DSA): an independent intermediary that connects people who need a loan with the banks and non-banking
           financial companies (NBFCs) that provide one.
         </p>

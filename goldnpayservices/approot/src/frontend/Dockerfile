@@ -20,7 +20,11 @@ COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 
 # Copy the source (.dockerignore keeps node_modules, dist,
-# coverage and .env files out) and build.
+# coverage and .env files out) and build. The build also prerenders every
+# page to static HTML; VITE_SITE_URL (the public origin, e.g. https://www.example.in)
+# is baked into canonical URLs, the sitemap and robots.txt.
+ARG VITE_SITE_URL=
+ENV VITE_SITE_URL=${VITE_SITE_URL}
 COPY . .
 RUN npm run build && ls -la dist
 

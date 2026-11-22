@@ -1,9 +1,12 @@
 import Section from '../components/ui/Section';
 import EligibilityChecker from '../components/tools/EligibilityChecker';
+import Seo from '../components/seo/Seo';
+import { pageSeo } from '../seo/pageSeo';
 
 export default function Eligibility() {
   return (
     <Section>
+      <Seo {...pageSeo('/eligibility')} />
       <h1 className="font-heading text-3xl font-semibold text-primary">
         Loan Eligibility Calculator
       </h1>

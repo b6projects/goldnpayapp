@@ -40,6 +40,6 @@ describe('Faq page', () => {
     expect(screen.getByRole('status')).toHaveTextContent('No questions match your search');
     fireEvent.change(input, { target: { value: '' } });
     expect(screen.getByText('How does the process work?')).toBeInTheDocument();
-    expect(screen.getByText('Do you charge customers a fee?')).toBeInTheDocument();
+    expect(screen.getByText('Does the lender charge any fees?')).toBeInTheDocument();
   });
 });

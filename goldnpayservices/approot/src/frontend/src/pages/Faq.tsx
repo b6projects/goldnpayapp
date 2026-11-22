@@ -4,6 +4,12 @@ import Accordion from '../components/ui/Accordion';
 import Input from '../components/ui/Input';
 import { faqs } from '../data/faqs';
 import { filterFaqs, groupFaqsByCategory } from '../lib/faqSearch';
+import Seo from '../components/seo/Seo';
+import { pageSeo } from '../seo/pageSeo';
+import { faqSchema } from '../seo/schema';
+
+// Markup always describes the full list, not the current search results.
+const faqJsonLd = faqSchema(faqs);
 
 export default function Faq() {
   const [query, setQuery] = useState('');
@@ -12,6 +18,7 @@ export default function Faq() {
   const count = results.length;
   return (
     <Section>
+      <Seo {...pageSeo('/faq')} jsonLd={[faqJsonLd]} />
       <h1 className="text-3xl font-bold text-text md:text-4xl">Frequently Asked Questions</h1>
       <div className="mt-6 max-w-xl">
         <Input

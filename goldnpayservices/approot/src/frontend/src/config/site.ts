@@ -1,14 +1,28 @@
 export const site = {
-  name: 'GoldNPay Services', // TODO(owner): confirm the business name
+  name: 'GoldNPay',
   tagline: 'Find the right loan, with expert help.',
-  url: 'https://example.com', // TODO(owner): production domain
+  url: 'https://goldnpay.in',
   phone: '+91 87543 26019',
   phoneE164: '+918754326019', // tel: link
   whatsapp: '918754326019', // digits only, for wa.me
-  address: 'Gold N Pay, 1st floor, No.23, 12 Cross Street, New Colony, Chrompet, Chennai 600044',
+  address: 'GoldNPay, 1st floor, No.23, 12 Cross Street, New Colony, Chrompet, Chennai 600044',
+  // Structured form of `address`, used for schema.org markup. Keep both in sync with the Google Business Profile.
+  addressDetail: {
+    streetAddress: 'GoldNPay, 1st floor, No.23, 12 Cross Street, New Colony, Chrompet',
+    locality: 'Chennai',
+    region: 'Tamil Nadu',
+    postalCode: '600044',
+    country: 'IN',
+  },
   mapEmbedUrl: '', // TODO(owner): hide the map if empty
   hours: 'Mon–Sat, 9:30 AM – 6:30 PM',
-  citiesServed: ['Chennai'], // TODO(owner)
+  // Structured form of `hours` for schema.org markup.
+  openingHours: {
+    days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    opens: '09:30',
+    closes: '18:30',
+  },
+  serviceArea: 'Tamil Nadu', // the whole state; the office is in Chennai (see address)
   grievanceOfficer: {
     name: 'TODO(owner)',
     email: 'grievance@example.com', // TODO(owner)

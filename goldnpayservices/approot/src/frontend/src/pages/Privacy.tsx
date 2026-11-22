@@ -1,10 +1,13 @@
 import LegalPage from '../components/legal/LegalPage';
 import { site } from '../config/site';
+import Seo from '../components/seo/Seo';
+import { pageSeo } from '../seo/pageSeo';
 
 export default function Privacy() {
   const g = site.grievanceOfficer;
   return (
     <LegalPage title="Privacy Policy">
+      <Seo {...pageSeo('/privacy')} />
       <section aria-labelledby="pp-data" className="space-y-2">
         <h2 id="pp-data" className="text-xl font-semibold">Data we collect</h2>
         <p>When you ask for a consultation we collect your name, phone number, city and loan details.</p>
