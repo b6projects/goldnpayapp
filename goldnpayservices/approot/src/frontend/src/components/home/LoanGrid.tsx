@@ -33,7 +33,7 @@ export default function LoanGrid() {
         id="loans-heading"
         className="heading-accent mb-8 text-2xl font-bold text-text md:text-3xl"
       >
-        Loan products
+        Our Loan products
       </h2>
       <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {loans.map((loan, i) => {

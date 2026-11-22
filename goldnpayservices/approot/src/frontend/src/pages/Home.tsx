@@ -4,7 +4,6 @@ import LoanGrid from '../components/home/LoanGrid';
 import HowItWorks from '../components/home/HowItWorks';
 import WhyUs from '../components/home/WhyUs';
 import Partners from '../components/home/Partners';
-import Testimonials from '../components/home/Testimonials';
 import FaqPreview from '../components/home/FaqPreview';
 import CtaBand from '../components/home/CtaBand';
 import Seo from '../components/seo/Seo';
@@ -25,7 +24,7 @@ export default function Home() {
       <HowItWorks />
       <WhyUs />
       <Partners />
-      <Testimonials />
+      {/* Customer testimonials are hidden until real, consented ones exist (see components/home/Testimonials.tsx). */}
       <FaqPreview />
       <CtaBand />
     </>

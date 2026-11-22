@@ -29,17 +29,16 @@ describe('Home', () => {
     expect(h1s[0]).toHaveTextContent(site.tagline);
   });
 
-  it('renders the 9 sections in the specified order', () => {
+  it('renders the 8 sections (testimonials hidden until real ones exist) in the specified order', () => {
     r();
     const names = screen.getAllByRole('region').map((el) => el.getAttribute('aria-label') ?? el.querySelector('h2')?.textContent);
     expect(names).toEqual([
       'Introduction',
       'Our numbers',
-      'Our loan products',
+      'Loan products',
       'How it works',
       'Why choose us',
       'Our lending partners',
-      'What customers say',
       'Frequently asked questions',
       'Not sure which loan is right for you?',
     ]);
