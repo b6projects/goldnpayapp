@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { cleanup, render as rtlRender, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import Privacy from './Privacy';
 import Terms from './Terms';
 import Disclaimer from './Disclaimer';
@@ -7,6 +9,9 @@ import LegalPage from '../components/legal/LegalPage';
 import { site } from '../config/site';
 
 afterEach(cleanup);
+
+// The legal pages link to each other, so they need a router.
+const render = (ui: ReactElement) => rtlRender(<MemoryRouter>{ui}</MemoryRouter>);
 
 const banner = 'Template — to be reviewed by a legal professional before launch.';
 
@@ -55,8 +60,9 @@ describe('LegalPage banner', () => {
     expect(screen.queryByRole('note')).not.toBeInTheDocument();
   });
 
-  it('defaults to showing the banner while legalReviewed is false', () => {
+  it('hides the banner by default once legalReviewed is true', () => {
+    expect(site.legalReviewed).toBe(true);
     render(<LegalPage title="X">body</LegalPage>);
-    expect(screen.getByRole('note')).toHaveTextContent(banner);
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
   });
 });

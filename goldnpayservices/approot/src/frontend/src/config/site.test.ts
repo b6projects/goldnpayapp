@@ -10,7 +10,7 @@ describe('site config', () => {
     expect(site.hours).toBe('Mon–Sat, 9:30 AM – 6:30 PM');
     expect(site.address).toContain('Chrompet, Chennai 600044');
     expect(site.mapEmbedUrl).toBe('');
-    expect(site.foundedYear).toBe(2024);
+    expect(site.foundedYear).toBe(2026);
   });
 
   it('has well-formed phoneE164 and whatsapp values', () => {
@@ -31,6 +31,6 @@ describe('site config', () => {
 
   it('has both boolean flags with the planned defaults', () => {
     expect(site.showSampleTestimonials).toBe(true);
-    expect(site.legalReviewed).toBe(false);
+    expect(site.legalReviewed).toBe(true);
   });
 });
